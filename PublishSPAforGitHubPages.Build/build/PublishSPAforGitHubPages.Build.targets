@@ -1,0 +1,39 @@
+﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <UsingTask TaskName="PublishSPAforGHPages.RewriteBaseHref" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
+  <UsingTask TaskName="PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
+
+  <!-- Define Properties -->
+  <Target Name="PublishSPAforGHPages_DefineProperties">
+    <PropertyGroup>
+      <GHPagesRoot Condition="'$(GHPagesRoot)'==''">$(PublishDir)wwwroot\</GHPagesRoot>
+      <GHPagesIndexHtml Condition="'$(GHPagesIndexHtml)'==''">$(GHPagesRoot)index.html</GHPagesIndexHtml>
+    </PropertyGroup>
+    <PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl Condition=" '$(GHPagesBase)' == '' " WorkFolder="$(ProjectDir)">
+      <Output TaskParameter="BaseUrl" PropertyName="GHPagesBase" />
+    </PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl>
+  </Target>
+
+  <!-- Generate ".nojekyll" file -->
+  <Target Name="PublishSPAforGHPages_GenerateNoJekyll" AfterTargets="Publish" Condition=" '$(GHPages)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
+    <WriteLinesToFile File="$(GHPagesRoot).nojekyll" Overwrite="false"/>
+  </Target>
+
+  <!-- Generate ".nojekyll" file -->
+  <Target Name="PublishSPAforGHPages_GenerateGitAttributes" AfterTargets="Publish" Condition=" '$(GHPages)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
+    <WriteLinesToFile File="$(GHPagesRoot).gitattributes" Lines="* -text" Overwrite="true" Condition="!Exists('$(GHPagesRoot).gitattributes')"/>
+  </Target>
+
+  <!-- Rewrite the base URL in the "<base href='~'/>" element -->
+  <Target Name="PublishSPAforGHPages_RewriteBaseHref" AfterTargets="Publish" Condition=" '$(GHPagesBase)' != '' "
+          DependsOnTargets="PublishSPAforGHPages_DefineProperties">
+    <PublishSPAforGHPages.RewriteBaseHref Condition="Exists($(GHPagesIndexHtml))" File="$(GHPagesIndexHtml)" BaseHref="$(GHPagesBase)"/>
+  </Target>
+
+  <!-- Copy index.html to 404.html -->
+  <Target Name="PublishSPAforGHPages_Generate404html" AfterTargets="Publish" Condition=" '$(GHPages)' == 'true' "
+          DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteBaseHref">
+    <Copy SourceFiles="$(GHPagesIndexHtml)" DestinationFiles="$(GHPagesRoot)404.html" Condition="Exists($(GHPagesIndexHtml))"/>
+  </Target>
+
+</Project>
