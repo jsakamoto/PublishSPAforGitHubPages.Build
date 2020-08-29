@@ -13,7 +13,7 @@
     <PackageReleaseNotes>(Please write the package release notes in "../RELEASE-NOTES.txt")</PackageReleaseNotes>
     <PackageOutputPath>../_dist</PackageOutputPath>
     <Copyright>Copyright © 2020 J.Sakamoto, Mozilla Public License 2.0</Copyright>
-    <Description>This package provides post published processing to deploy the ASP.NET Core SPA project (such as Blazor WebAssembly) as a GitHub pages site. (rewriting base URL in "index.html", generating ".nojekyll"  ".gitattributes" and "404.html".)</Description>
+    <Description>This package provides post published processing to deploy the .NET Core SPA project (such as Blazor WebAssembly) as a GitHub pages site. (rewriting base URL in "index.html", generating ".nojekyll"  ".gitattributes" and "404.html".)</Description>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 
