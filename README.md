@@ -1,4 +1,4 @@
-# Publish SPA for GitHub Pages - MSBuild Task & Scripts (designed for Blazor WebAssembly)
+# Publish SPA for GitHub Pages - MSBuild Task & Scripts (designed for Blazor WebAssembly) [![NuGet Package](https://img.shields.io/nuget/v/PublishSPAforGitHubPages.Build.svg)](https://www.nuget.org/packages/PublishSPAforGitHubPages.Build/)
 
 ## Summary
 
