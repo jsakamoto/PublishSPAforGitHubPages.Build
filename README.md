@@ -7,6 +7,8 @@ This is a NuGet package that provides post published processing to deploy the .N
 - Rewriting base URL in `index.html`
 - Generating `.nojekyll`,  `.gitattributes`, and `404.html`.
 
+![image](https://raw.githubusercontent.com/jsakamoto/PublishSPAforGitHubPages.Build/master/.assets/social-media.png)
+
 ## Usage
 
 At first, "git clone" or "git push" the .NET Core SPA (such as Blazor WebAssembly) project at your local disk from/to GitHub repository.
