@@ -1,2 +1,5 @@
+v.1.1.0
+- static files pre-compression support
+
 v.1.0.0
 - 1st release.

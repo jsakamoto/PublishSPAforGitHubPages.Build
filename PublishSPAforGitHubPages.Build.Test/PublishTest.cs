@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
@@ -41,12 +42,13 @@ namespace PublishSPAforGitHubPages.Build.Test
             XcopyDir(projectSrcDir, projectDir);
 
             var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
+            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes" }.ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
             var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
-            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes" }.Select(f => Path.Combine(publishedFilesDir, f)).ToArray();
+            var published404HtmlPath = addedFiles["404.html"];
 
             // At first, normal publishing doesn't contain any additional files.
             Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public").ExitCode.Is(0);
-            addedFiles.Any(f => File.Exists(f)).IsFalse();
+            addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
             // and, the base URL is not rewrited.
             GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
@@ -54,15 +56,19 @@ namespace PublishSPAforGitHubPages.Build.Test
             // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
             Delete(Path.Combine(projectDir, "public"));
             Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public", "-p:GHPages=true").ExitCode.Is(0);
-            addedFiles.All(f => File.Exists(f)).IsTrue();
+            addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
             // and, the base URL is rewrited to project sub path.
             GetBaseHref(publishedIndexHtmlPath).Is("/fizz.buzz/");
 
             // Validate that the "404.html" is a copy of the "index.html".
             var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
-            var _404HtmlBytes = File.ReadAllBytes(Path.Combine(publishedFilesDir, "404.html"));
+            var _404HtmlBytes = File.ReadAllBytes(published404HtmlPath);
             _404HtmlBytes.Is(indexHtmlBytes);
+
+            // Validate recompression static files.
+            ValidateRecompression(publishedIndexHtmlPath, indexHtmlBytes);
+            ValidateRecompression(published404HtmlPath, _404HtmlBytes);
         }
 
         [Theory]
@@ -75,12 +81,13 @@ namespace PublishSPAforGitHubPages.Build.Test
             XcopyDir(projectSrcDir, projectDir);
 
             var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
+            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes" }.ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
             var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
-            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes" }.Select(f => Path.Combine(publishedFilesDir, f)).ToArray();
+            var published404HtmlPath = addedFiles["404.html"];
 
             // At first, normal publishing doesn't contain any additional files.
             Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public").ExitCode.Is(0);
-            addedFiles.Any(f => File.Exists(f)).IsFalse();
+            addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
             // and, the base URL is not rewrited.
             GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
@@ -88,7 +95,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
             Delete(Path.Combine(projectDir, "public"));
             Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public", "-p:GHPages=true").ExitCode.Is(0);
-            addedFiles.All(f => File.Exists(f)).IsTrue();
+            addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
             // and, the base URL is rewrited to root path.
             GetBaseHref(publishedIndexHtmlPath).Is("/");
@@ -97,6 +104,28 @@ namespace PublishSPAforGitHubPages.Build.Test
             var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
             var _404HtmlBytes = File.ReadAllBytes(Path.Combine(publishedFilesDir, "404.html"));
             _404HtmlBytes.Is(indexHtmlBytes);
+
+            // Validate recompression static files.
+            ValidateRecompression(publishedIndexHtmlPath, indexHtmlBytes);
+            ValidateRecompression(published404HtmlPath, _404HtmlBytes);
+        }
+
+        private void ValidateRecompression(string htmlPath, byte[] htmlBytes)
+        {
+            ValidateRecompression(htmlPath, htmlBytes, ".gz", fileStream => new GZipStream(fileStream, CompressionMode.Decompress));
+            ValidateRecompression(htmlPath, htmlBytes, ".br", fileStream => new BrotliStream(fileStream, CompressionMode.Decompress));
+        }
+
+        private void ValidateRecompression(string htmlPath, byte[] htmlBytes, string suffix, Func<Stream, Stream> getDecompressingStream)
+        {
+            var compressedFilePath = htmlPath + suffix;
+            File.Exists(compressedFilePath).IsTrue();
+            using var memStream = new MemoryStream();
+            using var compressedFileStream = File.OpenRead(compressedFilePath);
+            using var decompressingStream = getDecompressingStream(compressedFileStream);
+            decompressingStream.CopyTo(memStream);
+
+            memStream.ToArray().Is(htmlBytes);
         }
     }
 }
