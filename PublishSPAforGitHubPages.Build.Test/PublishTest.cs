@@ -110,6 +110,32 @@ namespace PublishSPAforGitHubPages.Build.Test
             ValidateRecompression(published404HtmlPath, _404HtmlBytes);
         }
 
+        [Fact]
+        public void Publish_DisableComprression_Test()
+        {
+            using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");
+            var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
+            var projectDir = Path.Combine(workDir, "WorkDir");
+            XcopyDir(projectSrcDir, projectDir);
+
+            Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public", "-p:BlazorEnableCompression=false", "-p:GHPages=true")
+                .ExitCode.Is(0);
+
+            var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
+
+            var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
+            var published404HtmlPath = Path.Combine(publishedFilesDir, "404.html");
+
+            File.Exists(publishedIndexHtmlPath).IsTrue();
+            File.Exists(published404HtmlPath).IsTrue();
+
+            // compression files are not exists.
+            File.Exists(publishedIndexHtmlPath + ".gz").IsFalse();
+            File.Exists(published404HtmlPath + ".gz").IsFalse();
+            File.Exists(publishedIndexHtmlPath + ".br").IsFalse();
+            File.Exists(published404HtmlPath + ".br").IsFalse();
+        }
+
         private void ValidateRecompression(string htmlPath, byte[] htmlBytes)
         {
             ValidateRecompression(htmlPath, htmlBytes, ".gz", fileStream => new GZipStream(fileStream, CompressionMode.Decompress));

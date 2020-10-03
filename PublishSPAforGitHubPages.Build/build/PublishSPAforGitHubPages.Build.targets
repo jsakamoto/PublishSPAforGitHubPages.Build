@@ -4,12 +4,18 @@
   <UsingTask TaskName="PublishSPAforGHPages.RecompressStaticFile" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
   <UsingTask TaskName="PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
 
+  <PropertyGroup>
+    <BeforePublishSPAforGHPages>$(BeforePublishSPAforGHPages)</BeforePublishSPAforGHPages>
+  </PropertyGroup>
+
   <!-- Define Properties -->
-  <Target Name="PublishSPAforGHPages_DefineProperties">
+  <Target Name="PublishSPAforGHPages_DefineProperties" DependsOnTargets="$(BeforePublishSPAforGHPages)">
     <PropertyGroup>
       <GHPagesRoot Condition="'$(GHPagesRoot)'==''">$(PublishDir)wwwroot\</GHPagesRoot>
       <GHPagesIndexHtml Condition="'$(GHPagesIndexHtml)'==''">$(GHPagesRoot)index.html</GHPagesIndexHtml>
       <GHPages404Html Condition="'$(GHPages404Html)'==''">$(GHPagesRoot)404.html</GHPages404Html>
+      <GHPagesCompressGz>false</GHPagesCompressGz>
+      <GHPagesCompressBr>false</GHPagesCompressBr>
       <GHPagesCompressGz Condition="Exists('$(GHPagesIndexHtml).gz')">true</GHPagesCompressGz>
       <GHPagesCompressBr Condition="Exists('$(GHPagesIndexHtml).br')">true</GHPagesCompressBr>
     </PropertyGroup>
