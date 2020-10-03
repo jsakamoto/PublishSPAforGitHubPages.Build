@@ -4,9 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>PublishSPAforGHPages</RootNamespace>
     <IsTool>true</IsTool>
+    <LangVersion>Latest</LangVersion>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <Authors>J.Sakamoto</Authors>
-    <Version>1.0.0</Version>
+    <Version>1.1.0.1</Version>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jsakamoto/PublishSPAforGitHubPages.Build</PackageProjectUrl>
     <PackageTags>spa,github,gh-pages,github pages,githubpages</PackageTags>
@@ -15,10 +16,12 @@
     <Copyright>Copyright © 2020 J.Sakamoto, Mozilla Public License 2.0</Copyright>
     <Description>This package provides post published processing to deploy the .NET Core SPA project (such as Blazor WebAssembly) as a GitHub pages site. (rewriting base URL in "index.html", generating ".nojekyll"  ".gitattributes" and "404.html".)</Description>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.9.20" PrivateAssets="All" />
+    <PackageReference Include="Brotli.NET" Version="2.0.4.2" />
   </ItemGroup>
 
   <!-- Package Icon -->
@@ -48,6 +51,19 @@
       <PackageReleaseNotes>@(ReleaseNoteLines, '%0a')</PackageReleaseNotes>
       <PackageReleaseNotes>$([System.Text.RegularExpressions.Regex]::Match($(PackageReleaseNotes), "^(v\.[\d\.]+.+?)v\.[\d\.]+", System.Text.RegularExpressions.RegexOptions.Singleline).Groups[1].Value)</PackageReleaseNotes>
     </PropertyGroup>
+  </Target>
+
+  <Target Name="BundleAssemblies" BeforeTargets="GenerateNuspec" AfterTargets="Build">
+    <ItemGroup>
+      <None Include="$(TargetDir)Brotli.Core.dll">
+        <PackagePath>tools\</PackagePath>
+        <Pack>true</Pack>
+      </None>
+      <None Include="$(TargetDir)runtimes/**/*">
+        <PackagePath>tools\runtimes\</PackagePath>
+        <Pack>true</Pack>
+      </None>
+    </ItemGroup>
   </Target>
 
 </Project>
