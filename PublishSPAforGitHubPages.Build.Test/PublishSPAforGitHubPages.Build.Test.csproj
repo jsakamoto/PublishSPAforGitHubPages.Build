@@ -25,10 +25,15 @@
     <ProjectReference Include="..\PublishSPAforGitHubPages.Build\PublishSPAforGitHubPages.Build.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Fixtures/**/*"/>
+    <Compile Remove="Fixtures/**/*" />
     <Content Include="Fixtures/**/*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Fixtures\StaticFiles\Rewrited\index.html" />
+    <None Remove="Fixtures\StaticFiles\Source\index - autostart is true.html" />
+    <None Remove="Fixtures\StaticFiles\Source\index - no autostart.html" />
   </ItemGroup>
 
 </Project>

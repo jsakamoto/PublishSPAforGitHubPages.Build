@@ -9,6 +9,8 @@ namespace PublishSPAforGHPages
         [Required]
         public string File { get; set; }
 
+        public bool InjectBrotliLoader { get; set; } = true;
+
         [Required]
         public string BaseHref { get; set; }
 
@@ -16,6 +18,7 @@ namespace PublishSPAforGHPages
         {
             public bool HasChanged;
             public bool RewitedBaseHref;
+            public bool InjectedBrotliLoader;
         }
 
         public override bool Execute()
@@ -33,7 +36,7 @@ namespace PublishSPAforGHPages
                     if (m.Success)
                     {
                         state.RewitedBaseHref = true;
-                        var rewritedLine = m.Groups[1].Value + BaseHref + m.Groups[3].Value;
+                        var rewritedLine = line.Substring(0, m.Index) + m.Groups[1].Value + BaseHref + m.Groups[3].Value;
                         if (line != rewritedLine)
                         {
                             state.HasChanged = true;

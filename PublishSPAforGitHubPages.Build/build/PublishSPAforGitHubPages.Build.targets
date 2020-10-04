@@ -6,6 +6,7 @@
 
   <PropertyGroup>
     <BeforePublishSPAforGHPages>$(BeforePublishSPAforGHPages)</BeforePublishSPAforGHPages>
+    <GHPagesInjectBrotliLoader Condition=" '$(GHPagesInjectBrotliLoader)' == '' ">true</GHPagesInjectBrotliLoader>
   </PropertyGroup>
 
   <!-- Define Properties -->
@@ -18,6 +19,8 @@
       <GHPagesCompressBr>false</GHPagesCompressBr>
       <GHPagesCompressGz Condition="Exists('$(GHPagesIndexHtml).gz')">true</GHPagesCompressGz>
       <GHPagesCompressBr Condition="Exists('$(GHPagesIndexHtml).br')">true</GHPagesCompressBr>
+      <!-- if "GHPagesInjectBrotliLoader" is true but "*.br" files don't exist, then change "GHPagesInjectBrotliLoader" to false. -->
+      <GHPagesInjectBrotliLoader Condition=" '$(GHPagesInjectBrotliLoader)' == 'true' AND '$(GHPagesCompressBr)' == 'false' ">false</GHPagesInjectBrotliLoader>
     </PropertyGroup>
     <PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl Condition=" '$(GHPagesBase)' == '' " WorkFolder="$(ProjectDir)">
       <Output TaskParameter="BaseUrl" PropertyName="GHPagesBase" />
@@ -37,7 +40,10 @@
   <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element) -->
   <Target Name="PublishSPAforGHPages_RewriteIndexHtml" AfterTargets="Publish" Condition=" '$(GHPagesBase)' != '' "
           DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <PublishSPAforGHPages.RewriteIndexHtml Condition="Exists($(GHPagesIndexHtml))" File="$(GHPagesIndexHtml)" BaseHref="$(GHPagesBase)"/>
+    <PublishSPAforGHPages.RewriteIndexHtml Condition="Exists($(GHPagesIndexHtml))"
+                                           File="$(GHPagesIndexHtml)"
+                                           InjectBrotliLoader="$(GHPagesInjectBrotliLoader)"
+                                           BaseHref="$(GHPagesBase)"/>
   </Target>
 
   <!-- Copy index.html to 404.html -->
