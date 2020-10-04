@@ -37,6 +37,12 @@
     <WriteLinesToFile File="$(GHPagesRoot).gitattributes" Lines="* -text" Overwrite="true" Condition="!Exists('$(GHPagesRoot).gitattributes')"/>
   </Target>
 
+  <!-- Copy brotrli loader script files -->
+  <Target Name="PublishSPAforGHPages_CopyBrotliLoader" AfterTargets="Publish" Condition=" '$(GHPages)' == 'true' AND '$(GHPagesInjectBrotliLoader)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../tools/decode.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)decode.min.js')"/>
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../tools/brotliloader.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)brotliloader.js')"/>
+  </Target>
+
   <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element) -->
   <Target Name="PublishSPAforGHPages_RewriteIndexHtml" AfterTargets="Publish" Condition=" '$(GHPagesBase)' != '' "
           DependsOnTargets="PublishSPAforGHPages_DefineProperties">
