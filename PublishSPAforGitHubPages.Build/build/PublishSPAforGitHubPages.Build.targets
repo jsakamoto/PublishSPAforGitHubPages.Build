@@ -1,6 +1,6 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <UsingTask TaskName="PublishSPAforGHPages.RewriteBaseHref" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
+  <UsingTask TaskName="PublishSPAforGHPages.RewriteIndexHtml" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
   <UsingTask TaskName="PublishSPAforGHPages.RecompressStaticFile" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
   <UsingTask TaskName="PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
 
@@ -34,21 +34,21 @@
     <WriteLinesToFile File="$(GHPagesRoot).gitattributes" Lines="* -text" Overwrite="true" Condition="!Exists('$(GHPagesRoot).gitattributes')"/>
   </Target>
 
-  <!-- Rewrite the base URL in the "<base href='~'/>" element -->
-  <Target Name="PublishSPAforGHPages_RewriteBaseHref" AfterTargets="Publish" Condition=" '$(GHPagesBase)' != '' "
+  <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element) -->
+  <Target Name="PublishSPAforGHPages_RewriteIndexHtml" AfterTargets="Publish" Condition=" '$(GHPagesBase)' != '' "
           DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <PublishSPAforGHPages.RewriteBaseHref Condition="Exists($(GHPagesIndexHtml))" File="$(GHPagesIndexHtml)" BaseHref="$(GHPagesBase)"/>
+    <PublishSPAforGHPages.RewriteIndexHtml Condition="Exists($(GHPagesIndexHtml))" File="$(GHPagesIndexHtml)" BaseHref="$(GHPagesBase)"/>
   </Target>
 
   <!-- Copy index.html to 404.html -->
   <Target Name="PublishSPAforGHPages_Generate404html" AfterTargets="Publish" Condition=" '$(GHPages)' == 'true' "
-          DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteBaseHref">
+          DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteIndexHtml">
     <Copy SourceFiles="$(GHPagesIndexHtml)" DestinationFiles="$(GHPages404Html)" Condition="Exists($(GHPagesIndexHtml))"/>
   </Target>
 
   <!-- Recompress static files -->
   <Target Name="PublishSPAforGHPages_RecompressStaticFiles" AfterTargets="Publish" Condition=" '$(GHPages)' == 'true' "
-          DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteBaseHref;PublishSPAforGHPages_Generate404html">
+          DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteIndexHtml;PublishSPAforGHPages_Generate404html">
     <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPagesIndexHtml))" File="$(GHPagesIndexHtml)" EnableGzip="$(GHPagesCompressGz)" EnableBrotli="$(GHPagesCompressBr)" />
     <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPages404Html))" File="$(GHPages404Html)" EnableGzip="$(GHPagesCompressGz)" EnableBrotli="$(GHPagesCompressBr)" />
   </Target>

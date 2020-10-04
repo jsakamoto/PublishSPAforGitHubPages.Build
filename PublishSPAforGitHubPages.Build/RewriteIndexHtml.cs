@@ -4,7 +4,7 @@ using Microsoft.Build.Framework;
 
 namespace PublishSPAforGHPages
 {
-    public class RewriteBaseHref : Microsoft.Build.Utilities.Task
+    public class RewriteIndexHtml : Microsoft.Build.Utilities.Task
     {
         [Required]
         public string File { get; set; }
