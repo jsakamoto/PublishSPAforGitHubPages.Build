@@ -37,6 +37,9 @@ namespace PublishSPAforGHPages
                 // set autostart of the blazor.webassembly.js to false
                 if (DisabledAutoStart(ref state, rewritedLines, line)) continue;
 
+                // inject brotli loader
+                if (InjectedBrotliLoader(ref state, rewritedLines, line)) continue;
+
                 rewritedLines.Add(line);
             }
 
@@ -94,6 +97,26 @@ namespace PublishSPAforGHPages
             }
 
             return false;
+        }
+
+        private bool InjectedBrotliLoader(ref State state, List<string> rewritedLines, string line)
+        {
+            if (state.InjectedBrotliLoader) return false;
+
+            if (line.TrimStart().StartsWith(@"<script src=""decode.min.js"""))
+            {
+                state.InjectedBrotliLoader = true;
+                return false;
+            }
+
+            if (!line.TrimStart().StartsWith("</body>")) return false;
+
+            rewritedLines.Add(@"    <script src=""decode.min.js""></script>");
+            rewritedLines.Add(@"    <script src=""brotliloader.js""></script>");
+            rewritedLines.Add(line); // line is "</body>"
+            state.InjectedBrotliLoader = true;
+            state.HasChanged = true;
+            return true;
         }
     }
 }
