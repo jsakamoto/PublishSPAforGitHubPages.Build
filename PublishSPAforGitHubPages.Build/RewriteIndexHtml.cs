@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 
@@ -19,6 +20,7 @@ namespace PublishSPAforGHPages
             public bool HasChanged;
             public bool RewitedBaseHref;
             public bool InjectedBrotliLoader;
+            public bool DisabledAutoStart;
         }
 
         public override bool Execute()
@@ -30,21 +32,10 @@ namespace PublishSPAforGHPages
             foreach (var line in lines)
             {
                 // rewrite "base href"
-                if (!state.RewitedBaseHref)
-                {
-                    var m = Regex.Match(line, "(<base[ ]+href=\")([^\"]*)(\"[ ]*/>)");//, m => m.Groups[1].Value + BaseHref + m.Groups[3].Value)
-                    if (m.Success)
-                    {
-                        state.RewitedBaseHref = true;
-                        var rewritedLine = line.Substring(0, m.Index) + m.Groups[1].Value + BaseHref + m.Groups[3].Value;
-                        if (line != rewritedLine)
-                        {
-                            state.HasChanged = true;
-                            rewritedLines.Add(rewritedLine);
-                            continue;
-                        }
-                    }
-                }
+                if (RewritedBaseHref(ref state, rewritedLines, line)) continue;
+
+                // set autostart of the blazor.webassembly.js to false
+                if (DisabledAutoStart(ref state, rewritedLines, line)) continue;
 
                 rewritedLines.Add(line);
             }
@@ -55,6 +46,54 @@ namespace PublishSPAforGHPages
             }
 
             return true;
+        }
+
+        private bool RewritedBaseHref(ref State state, List<string> rewritedLines, string line)
+        {
+            if (state.RewitedBaseHref) return false;
+
+            var m = Regex.Match(line, "(<base[ ]+href=\")([^\"]*)(\"[ ]*/>.*)");
+            if (m.Success)
+            {
+                state.RewitedBaseHref = true;
+                var rewritedLine = line.Substring(0, m.Index) + m.Groups[1].Value + BaseHref + m.Groups[3].Value;
+                if (line != rewritedLine)
+                {
+                    state.HasChanged = true;
+                    rewritedLines.Add(rewritedLine);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool DisabledAutoStart(ref State state, List<string> rewritedLines, string line)
+        {
+            if (state.DisabledAutoStart) return false;
+
+            var m = Regex.Match(line, @"(<script[^>]+src=""_framework/blazor.webassembly.js""[^>]*)(></script>.*)");
+            if (m.Success)
+            {
+                state.DisabledAutoStart = true;
+                var part1 = m.Groups[1].Value;
+                var part2 = m.Groups[2].Value;
+                var m2 = Regex.Match(part1, @"autostart="".+""");
+                if (m2.Success)
+                    part1 = part1.Substring(0, m2.Index) + @"autostart=""false""" + part1.Substring(m2.Index + m2.Length);
+                else
+                    part1 += @" autostart=""false""";
+
+                var rewritedLine = line.Substring(0, m.Index) + part1 + part2;
+                if (line != rewritedLine)
+                {
+                    state.HasChanged = true;
+                    rewritedLines.Add(rewritedLine);
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
