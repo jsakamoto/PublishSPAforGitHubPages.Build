@@ -1,5 +1,6 @@
 v.1.1.0
 - static files pre-compression support
+- inject Brotli loader for Blazor WebAssembly app
 
 v.1.0.0
 - 1st release.

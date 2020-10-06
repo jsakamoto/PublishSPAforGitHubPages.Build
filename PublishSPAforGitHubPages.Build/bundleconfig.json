@@ -1,0 +1,13 @@
+[
+  {
+    "outputFileName": "bundle/scripts/brotliloader.min.js",
+    "inputFiles": [
+      "bundle/scripts/brotliloader.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  }
+]

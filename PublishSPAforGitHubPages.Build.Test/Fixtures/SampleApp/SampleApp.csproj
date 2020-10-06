@@ -11,6 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PublishSPAforGitHubPages.Build" Version="1.1.0.1" />
+    <PackageReference Include="PublishSPAforGitHubPages.Build" Version="1.1.0.5-preview.1" />
   </ItemGroup>
 </Project>

@@ -39,8 +39,8 @@
 
   <!-- Copy brotrli loader script files -->
   <Target Name="PublishSPAforGHPages_CopyBrotliLoader" AfterTargets="Publish" Condition=" '$(GHPages)' == 'true' AND '$(GHPagesInjectBrotliLoader)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)../tools/decode.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)decode.min.js')"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)../tools/brotliloader.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)brotliloader.js')"/>
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../bundle/scripts/decode.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)decode.min.js')"/>
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../bundle/scripts/brotliloader.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)brotliloader.min.js')"/>
   </Target>
 
   <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element) -->

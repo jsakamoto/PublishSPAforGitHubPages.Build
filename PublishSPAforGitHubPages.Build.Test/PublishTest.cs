@@ -42,7 +42,8 @@ namespace PublishSPAforGitHubPages.Build.Test
             XcopyDir(projectSrcDir, projectDir);
 
             var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
-            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes" }.ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
+            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "decode.min.js", "brotliloader.min.js" }
+                .ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
             var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
             var published404HtmlPath = addedFiles["404.html"];
 
@@ -81,7 +82,8 @@ namespace PublishSPAforGitHubPages.Build.Test
             XcopyDir(projectSrcDir, projectDir);
 
             var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
-            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes" }.ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
+            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "decode.min.js", "brotliloader.min.js" }
+                .ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
             var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
             var published404HtmlPath = addedFiles["404.html"];
 

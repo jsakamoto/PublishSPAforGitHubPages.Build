@@ -112,7 +112,7 @@ namespace PublishSPAforGHPages
             if (!line.TrimStart().StartsWith("</body>")) return false;
 
             rewritedLines.Add(@"    <script src=""decode.min.js""></script>");
-            rewritedLines.Add(@"    <script src=""brotliloader.js""></script>");
+            rewritedLines.Add(@"    <script src=""brotliloader.min.js""></script>");
             rewritedLines.Add(line); // line is "</body>"
             state.InjectedBrotliLoader = true;
             state.HasChanged = true;
