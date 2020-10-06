@@ -166,3 +166,5 @@ In this example workflow file, the project is published to the GitHub page site 
 ## License
 
 [Mozilla Public License Version 2.0](https://raw.githubusercontent.com/jsakamoto/PublishSPAforGitHubPages.Build/master/LICENSE)
+
+( [Third party notices](https://raw.githubusercontent.com/jsakamoto/PublishSPAforGitHubPages.Build/master/THIRD-PARTY-NOTICES.txt) )
