@@ -30,5 +30,25 @@ namespace PublishSPAforGitHubPages.Build.Test
             var expectedPath = Path.Combine(workDir, "Rewrited", "index.html");
             File.ReadAllLines(task.File).Is(File.ReadAllLines(expectedPath));
         }
+
+        [Fact]
+        public void NotInjectedBrotliLoader_Test()
+        {
+            using var workDir = WorkDir.SetupWorkDir("StaticFiles");
+            var task = new RewriteIndexHtml
+            {
+                File = Path.Combine(workDir, "Source", "index.html"),
+                InjectBrotliLoader = false,
+                BaseHref = "/"
+            };
+
+            var original = File.ReadAllText(task.File);
+
+            task.Execute().IsTrue();
+
+            var rewrited = File.ReadAllText(task.File);
+
+            rewrited.Is(original);
+        }
     }
 }

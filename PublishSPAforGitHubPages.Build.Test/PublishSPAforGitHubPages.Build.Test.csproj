@@ -31,6 +31,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Fixtures\StaticFiles\Rewrited\index - brotli loader is not injected.html" />
     <None Remove="Fixtures\StaticFiles\Rewrited\index.html" />
     <None Remove="Fixtures\StaticFiles\Source\index - autostart is true.html" />
     <None Remove="Fixtures\StaticFiles\Source\index - no autostart.html" />

@@ -73,6 +73,7 @@ namespace PublishSPAforGHPages
 
         private bool DisabledAutoStart(ref State state, List<string> rewritedLines, string line)
         {
+            if (!InjectBrotliLoader) return false;
             if (state.DisabledAutoStart) return false;
 
             var m = Regex.Match(line, @"(<script[^>]+src=""_framework/blazor.webassembly.js""[^>]*)(></script>.*)");
@@ -101,6 +102,7 @@ namespace PublishSPAforGHPages
 
         private bool InjectedBrotliLoader(ref State state, List<string> rewritedLines, string line)
         {
+            if (!InjectBrotliLoader) return false;
             if (state.InjectedBrotliLoader) return false;
 
             if (line.TrimStart().StartsWith(@"<script src=""decode.min.js"""))

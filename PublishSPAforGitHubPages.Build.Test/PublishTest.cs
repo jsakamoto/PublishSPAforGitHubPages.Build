@@ -125,17 +125,17 @@ namespace PublishSPAforGitHubPages.Build.Test
 
             var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
 
-            var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
-            var published404HtmlPath = Path.Combine(publishedFilesDir, "404.html");
-
-            File.Exists(publishedIndexHtmlPath).IsTrue();
-            File.Exists(published404HtmlPath).IsTrue();
+            var actualPublishedFiles = Directory.GetFiles(publishedFilesDir).OrderBy(name => name).ToArray();
 
             // compression files are not exists.
-            File.Exists(publishedIndexHtmlPath + ".gz").IsFalse();
-            File.Exists(published404HtmlPath + ".gz").IsFalse();
-            File.Exists(publishedIndexHtmlPath + ".br").IsFalse();
-            File.Exists(published404HtmlPath + ".br").IsFalse();
+            var expectedPublishedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "index.html", "favicon.ico" }
+                .ToDictionary(name => name, name => Path.Combine(publishedFilesDir, name));
+            actualPublishedFiles.Is(expectedPublishedFiles.Values.OrderBy(name => name));
+
+            // Brotli loader was not injected.
+            var expectedIndexHtmlContents = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "StaticFiles", "Rewrited", "index - brotli loader is not injected.html"));
+            var actualIndexHtmlContents = File.ReadAllText(expectedPublishedFiles["index.html"]);
+            actualIndexHtmlContents.Is(expectedIndexHtmlContents);
         }
 
         private void ValidateRecompression(string htmlPath, byte[] htmlBytes)
