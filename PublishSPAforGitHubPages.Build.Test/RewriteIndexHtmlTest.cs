@@ -50,5 +50,22 @@ namespace PublishSPAforGitHubPages.Build.Test
 
             rewrited.Is(original);
         }
+
+        [Test]
+        public void NotInjectedBrotliLoader_bue_to_its_not_Blazor_Test()
+        {
+            using var workDir = WorkDir.SetupWorkDir("StaticFiles");
+            var task = new RewriteIndexHtml
+            {
+                File = Path.Combine(workDir, "Source", "index - no blazor.html"),
+                InjectBrotliLoader = true,
+                BaseHref = "/foo/bar/"
+            };
+
+            task.Execute().IsTrue();
+            var rewrited = File.ReadAllText(task.File);
+            var expected = File.ReadAllText(Path.Combine(workDir, "Rewrited", "index - no blazor.html"));
+            rewrited.Is(expected);
+        }
     }
 }

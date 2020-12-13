@@ -20,7 +20,7 @@ namespace PublishSPAforGHPages
             public bool HasChanged;
             public bool RewitedBaseHref;
             public bool InjectedBrotliLoader;
-            public bool DisabledAutoStart;
+            public bool DisabledAutoStartOfBlazorWasmLoader;
         }
 
         public override bool Execute()
@@ -74,12 +74,12 @@ namespace PublishSPAforGHPages
         private bool DisabledAutoStart(ref State state, List<string> rewritedLines, string line)
         {
             if (!InjectBrotliLoader) return false;
-            if (state.DisabledAutoStart) return false;
+            if (state.DisabledAutoStartOfBlazorWasmLoader) return false;
 
             var m = Regex.Match(line, @"(<script[^>]+src=""_framework/blazor.webassembly.js""[^>]*)(></script>.*)");
             if (m.Success)
             {
-                state.DisabledAutoStart = true;
+                state.DisabledAutoStartOfBlazorWasmLoader = true;
                 var part1 = m.Groups[1].Value;
                 var part2 = m.Groups[2].Value;
                 var m2 = Regex.Match(part1, @"autostart="".+""");
@@ -111,14 +111,19 @@ namespace PublishSPAforGHPages
                 return false;
             }
 
-            if (!line.TrimStart().StartsWith("</body>")) return false;
-
-            rewritedLines.Add(@"    <script src=""decode.min.js""></script>");
-            rewritedLines.Add(@"    <script src=""brotliloader.min.js""></script>");
-            rewritedLines.Add(line); // line is "</body>"
-            state.InjectedBrotliLoader = true;
-            state.HasChanged = true;
-            return true;
+            if (line.TrimStart().StartsWith("</body>"))
+            {
+                if (state.DisabledAutoStartOfBlazorWasmLoader)
+                {
+                    rewritedLines.Add(@"    <script src=""decode.min.js""></script>");
+                    rewritedLines.Add(@"    <script src=""brotliloader.min.js""></script>");
+                    rewritedLines.Add(line); // line is "</body>"
+                    state.InjectedBrotliLoader = true;
+                    state.HasChanged = true;
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
