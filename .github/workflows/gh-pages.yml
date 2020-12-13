@@ -16,7 +16,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.100-rc.1.20452.10
+          dotnet-version: 5.0.101
 
       # Publish the site
       - name: Publish
@@ -28,3 +28,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: public/wwwroot
+          force_orphan: true
