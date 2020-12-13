@@ -6,11 +6,12 @@ using System.Linq;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using PublishSPAforGitHubPages.Build.Test.Internals;
-using Xunit;
+using NUnit.Framework;
 using static PublishSPAforGitHubPages.Build.Test.Internals.Shell;
 
 namespace PublishSPAforGitHubPages.Build.Test
 {
+    [Parallelizable(ParallelScope.Children)]
     public class PublishTest
     {
         private readonly HtmlParser _Parser = new HtmlParser();
@@ -32,8 +33,8 @@ namespace PublishSPAforGitHubPages.Build.Test
             return indexHtmlDoc.Head.Children.OfType<IHtmlBaseElement>().First().Href;
         }
 
-        [Theory]
-        [MemberData(nameof(TestPattern))]
+        [Test]
+        [TestCaseSource(nameof(TestPattern))]
         public void Publish_ProjectSite_Test(string protocol, string subDir)
         {
             using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol);
@@ -72,8 +73,8 @@ namespace PublishSPAforGitHubPages.Build.Test
             ValidateRecompression(published404HtmlPath, _404HtmlBytes);
         }
 
-        [Theory]
-        [MemberData(nameof(TestPattern))]
+        [Test]
+        [TestCaseSource(nameof(TestPattern))]
         public void Publish_UserSite_Test(string protocol, string subDir)
         {
             using var workDir = WorkDir.SetupWorkDir(siteType: "User", protocol);
@@ -112,7 +113,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             ValidateRecompression(published404HtmlPath, _404HtmlBytes);
         }
 
-        [Fact]
+        [Test]
         public void Publish_DisableComprression_Test()
         {
             using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");

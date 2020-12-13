@@ -1,13 +1,13 @@
 ﻿using System.IO;
 using PublishSPAforGHPages;
 using PublishSPAforGitHubPages.Build.Test.Internals;
-using Xunit;
+using NUnit.Framework;
 
 namespace PublishSPAforGitHubPages.Build.Test
 {
     public class RecompressStaticFileTest
     {
-        [Fact]
+        [Test]
         public void Recompress_Test()
         {
             using var workDir = WorkDir.SetupWorkDir("StaticFiles");

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using PublishSPAforGHPages;
 using PublishSPAforGitHubPages.Build.Test.Internals;
-using Xunit;
+using NUnit.Framework;
 
 namespace PublishSPAforGitHubPages.Build.Test
 {
@@ -19,8 +19,8 @@ namespace PublishSPAforGitHubPages.Build.Test
             new object[]{"SSH.git", "WorkDir"},
         };
 
-        [Theory]
-        [MemberData(nameof(TestPattern))]
+        [Test]
+        [TestCaseSource(nameof(TestPattern))]
         public void GetBaseUrl_ProjectSite_Test(string protocol, string subDir)
         {
             using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol);
@@ -33,8 +33,8 @@ namespace PublishSPAforGitHubPages.Build.Test
             task.BaseUrl.Is("/fizz.buzz/");
         }
 
-        [Theory]
-        [MemberData(nameof(TestPattern))]
+        [Test]
+        [TestCaseSource(nameof(TestPattern))]
         public void GetBaseUrl_UserSite_Test(string protocol, string subDir)
         {
             using var workDir = WorkDir.SetupWorkDir(siteType: "User", protocol);

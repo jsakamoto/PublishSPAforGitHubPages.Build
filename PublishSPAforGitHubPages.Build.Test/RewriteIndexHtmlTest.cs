@@ -2,7 +2,7 @@
 using System.IO;
 using PublishSPAforGHPages;
 using PublishSPAforGitHubPages.Build.Test.Internals;
-using Xunit;
+using NUnit.Framework;
 
 namespace PublishSPAforGitHubPages.Build.Test
 {
@@ -13,8 +13,8 @@ namespace PublishSPAforGitHubPages.Build.Test
             new object[]{ "index - autostart is true.html" },
         };
 
-        [Theory]
-        [MemberData(nameof(TestPattern))]
+        [Test]
+        [TestCaseSource(nameof(TestPattern))]
         public void InjectBrotliLoader_Test(string fileName)
         {
             using var workDir = WorkDir.SetupWorkDir("StaticFiles");
@@ -31,7 +31,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             File.ReadAllLines(task.File).Is(File.ReadAllLines(expectedPath));
         }
 
-        [Fact]
+        [Test]
         public void NotInjectedBrotliLoader_Test()
         {
             using var workDir = WorkDir.SetupWorkDir("StaticFiles");
