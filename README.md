@@ -4,8 +4,9 @@
 
 This is a NuGet package that provides post published processing to deploy the .NET Core SPA project (such as Blazor WebAssembly) as a GitHub pages site.
 
-- Rewriting base URL in `index.html`
-- Generating `.nojekyll`,  `.gitattributes`, and `404.html`.
+- **Rewriting base URL** in `index.html`
+- Generating `.nojekyll`,  `.gitattributes`, and **`404.html`**.
+- Make it to be fetching assembly files (**"~.dll.br"**) that are **pre-compressed by the Brotli** algorithm. (if the site is a Blazor WebAssembly site.)
 
 ![image](https://raw.githubusercontent.com/jsakamoto/PublishSPAforGitHubPages.Build/master/.assets/social-media.png)
 
@@ -103,6 +104,7 @@ This package does the following steps after publishing of the .NET Core SPA proj
 - Rewriting the URL in `<base href="..."/>` element in the `index.html` to fit the GitHub page URL.
 - Copy the `index.html` to the `404.html`.
 - Generate `.nojekyll` file and `.gitattributes` file.
+- Enable fetching pre-compressed assembly files. (for a Blazor WebAssembly site)
 
 ### Working folder
 
@@ -118,6 +120,12 @@ The base URL is determined automatically from the GitHub repository URL that com
 This feature will work well to all site types of GitHub pages, such as "Project site", "User site", and "Organization site".
 
 If you want to specify the base URL by yourself, you can do it by setting the base URL  to `GHPagesBase` MSBuild property explicitly.
+
+### Enable fetching pre-compressed assembly files. (for a Blazor WebAssembly site)
+
+If the `index.html` contains the reference of the Blazor WebAssembly loader script file, this package injects the custom loader script into the `index.html` to enable fetching pre-compressed assembly files (.dll.br).
+
+If you disable this behavior, set `GHPagesInjectBrotliLoader` MSBuild property to `false`.
 
 ### Works with "GitHub Actions" to deploy it to GitHub page site
 
