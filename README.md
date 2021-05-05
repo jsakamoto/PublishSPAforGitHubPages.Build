@@ -63,7 +63,7 @@ You can also to do it by direct editing the `.csproj` file to add `<PackageRefer
   <ItemGroup>
     ...
     <!-- 👇 Add this node inside any "ItemGroup" node. -->
-    <PackageReference Include="PublishSPAforGitHubPages.Build" Version="1.0.0" />
+    <PackageReference Include="PublishSPAforGitHubPages.Build" Version="1.3.0" />
     ...
 ```
 
@@ -146,7 +146,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       # Checkout the code
       - uses: actions/checkout@v2
@@ -155,7 +155,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.x
+          dotnet-version: 5.0.202
 
       # Publish the site
       - name: Publish
@@ -167,6 +167,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: public/wwwroot
+          force_orphan: true
 ```
 
 In this example workflow file, the project is published to the GitHub page site each master branch pushed.
