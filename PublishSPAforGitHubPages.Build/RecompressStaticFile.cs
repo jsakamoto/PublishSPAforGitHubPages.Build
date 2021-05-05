@@ -15,9 +15,25 @@ namespace PublishSPAforGHPages
 
         public bool EnableBrotli { get; set; } = true;
 
+        public bool Recursive { get; set; }
+
         public override bool Execute()
         {
-            using var sourceStream = System.IO.File.OpenRead(this.File);
+            var fileName = Path.GetFileName(this.File);
+            var baseDir = Path.GetDirectoryName(this.File);
+            var searchOption = this.Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+            var targetFiles = Directory.GetFiles(baseDir, fileName, searchOption);
+            foreach (var targeFile in targetFiles)
+            {
+                Recompress(targeFile);
+            }
+
+            return true;
+        }
+
+        private void Recompress(string file)
+        {
+            using var sourceStream = System.IO.File.OpenRead(file);
 
             if (EnableGzip)
             {
@@ -36,8 +52,6 @@ namespace PublishSPAforGHPages
                 sourceStream.Seek(0, SeekOrigin.Begin);
                 sourceStream.CopyTo(compressingStream);
             }
-
-            return true;
         }
     }
 }

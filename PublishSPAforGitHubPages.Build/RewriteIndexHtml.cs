@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 
@@ -15,6 +16,8 @@ namespace PublishSPAforGHPages
         [Required]
         public string BaseHref { get; set; }
 
+        public bool Recursive { get; set; }
+
         private struct State
         {
             public bool HasChanged;
@@ -25,8 +28,21 @@ namespace PublishSPAforGHPages
 
         public override bool Execute()
         {
+            var fileName = Path.GetFileName(this.File);
+            var baseDir = Path.GetDirectoryName(this.File);
+            var searchOption = this.Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+            var targetFiles = Directory.GetFiles(baseDir, fileName, searchOption);
+            foreach (var targeFile in targetFiles)
+            {
+                Rewrite(targeFile);
+            }
+            return true;
+        }
+
+        private void Rewrite(string file)
+        {
             var state = new State();
-            var lines = System.IO.File.ReadLines(File);
+            var lines = System.IO.File.ReadLines(file);
             var rewritedLines = new List<string>();
 
             foreach (var line in lines)
@@ -45,10 +61,8 @@ namespace PublishSPAforGHPages
 
             if (state.HasChanged)
             {
-                System.IO.File.WriteAllLines(File, rewritedLines);
+                System.IO.File.WriteAllLines(file, rewritedLines);
             }
-
-            return true;
         }
 
         private bool RewritedBaseHref(ref State state, List<string> rewritedLines, string line)

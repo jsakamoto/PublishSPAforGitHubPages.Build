@@ -21,6 +21,7 @@
       <GHPagesCompressBr Condition="Exists('$(GHPagesIndexHtml).br')">true</GHPagesCompressBr>
       <!-- if "GHPagesInjectBrotliLoader" is true but "*.br" files don't exist, then change "GHPagesInjectBrotliLoader" to false. -->
       <GHPagesInjectBrotliLoader Condition=" '$(GHPagesInjectBrotliLoader)' == 'true' AND ('$(GHPagesCompressBr)' == 'false' OR '$(BlazorEnableCompression)' == 'false')">false</GHPagesInjectBrotliLoader>
+      <GHPagesRecursive Condition="'$(GHPagesRecursive)'==''">true</GHPagesRecursive>
     </PropertyGroup>
     <PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl Condition=" '$(GHPagesBase)' == '' " WorkFolder="$(ProjectDir)">
       <Output TaskParameter="BaseUrl" PropertyName="GHPagesBase" />
@@ -49,7 +50,8 @@
     <PublishSPAforGHPages.RewriteIndexHtml Condition="Exists($(GHPagesIndexHtml))"
                                            File="$(GHPagesIndexHtml)"
                                            InjectBrotliLoader="$(GHPagesInjectBrotliLoader)"
-                                           BaseHref="$(GHPagesBase)"/>
+                                           BaseHref="$(GHPagesBase)"
+                                           Recursive="$(GHPagesRecursive)"/>
   </Target>
 
   <!-- Copy index.html to 404.html -->
@@ -61,8 +63,8 @@
   <!-- Recompress static files -->
   <Target Name="PublishSPAforGHPages_RecompressStaticFiles" AfterTargets="Publish" Condition=" '$(GHPages)' == 'true' "
           DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteIndexHtml;PublishSPAforGHPages_Generate404html">
-    <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPagesIndexHtml))" File="$(GHPagesIndexHtml)" EnableGzip="$(GHPagesCompressGz)" EnableBrotli="$(GHPagesCompressBr)" />
-    <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPages404Html))" File="$(GHPages404Html)" EnableGzip="$(GHPagesCompressGz)" EnableBrotli="$(GHPagesCompressBr)" />
+    <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPagesIndexHtml))" File="$(GHPagesIndexHtml)" EnableGzip="$(GHPagesCompressGz)" EnableBrotli="$(GHPagesCompressBr)" Recursive="$(GHPagesRecursive)" />
+    <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPages404Html))" File="$(GHPages404Html)" EnableGzip="$(GHPagesCompressGz)" EnableBrotli="$(GHPagesCompressBr)" Recursive="$(GHPagesRecursive)" />
   </Target>
 
 </Project>
