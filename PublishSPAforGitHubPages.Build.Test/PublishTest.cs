@@ -14,9 +14,9 @@ namespace PublishSPAforGitHubPages.Build.Test
     [Parallelizable(ParallelScope.Children)]
     public class PublishTest
     {
-        private readonly HtmlParser _Parser = new HtmlParser();
+        private readonly HtmlParser _Parser = new();
 
-        public static IEnumerable<object[]> TestPattern = new[] {
+        public static readonly IEnumerable<object[]> TestPattern = new[] {
             new object[]{"HTTPS", ""},
             new object[]{"HTTPS", "WorkDir"},
             //new object[]{"HTTPS.git", ""},
@@ -139,13 +139,13 @@ namespace PublishSPAforGitHubPages.Build.Test
             actualIndexHtmlContents.Is(expectedIndexHtmlContents);
         }
 
-        private void ValidateRecompression(string htmlPath, byte[] htmlBytes)
+        private static void ValidateRecompression(string htmlPath, byte[] htmlBytes)
         {
             ValidateRecompression(htmlPath, htmlBytes, ".gz", fileStream => new GZipStream(fileStream, CompressionMode.Decompress));
             ValidateRecompression(htmlPath, htmlBytes, ".br", fileStream => new BrotliStream(fileStream, CompressionMode.Decompress));
         }
 
-        private void ValidateRecompression(string htmlPath, byte[] htmlBytes, string suffix, Func<Stream, Stream> getDecompressingStream)
+        private static void ValidateRecompression(string htmlPath, byte[] htmlBytes, string suffix, Func<Stream, Stream> getDecompressingStream)
         {
             var compressedFilePath = htmlPath + suffix;
             File.Exists(compressedFilePath).IsTrue();
