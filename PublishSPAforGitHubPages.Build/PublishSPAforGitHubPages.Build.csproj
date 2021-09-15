@@ -17,6 +17,8 @@
     <Description>This package provides post published processing to deploy the .NET Core SPA project (such as Blazor WebAssembly) as a GitHub pages site. (rewriting base URL in "index.html", generating ".nojekyll"  ".gitattributes" and "404.html".)</Description>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PackageIcon>nupkg-icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,16 +29,9 @@
     </PackageReference>
   </ItemGroup>
 
-  <!-- Package Icon -->
-  <PropertyGroup>
-    <PackageIcon>nupkg-icon.png</PackageIcon>
-  </PropertyGroup>
   <ItemGroup>
-    <None Include="..\.assets\nupkg-icon.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-      <Visible>false</Visible>
-    </None>
+    <None Include="..\.assets\nupkg-icon.png" Pack="True" PackagePath="/" Visible="false" />
+    <None Include="..\README.md" Pack="True" PackagePath="/" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
