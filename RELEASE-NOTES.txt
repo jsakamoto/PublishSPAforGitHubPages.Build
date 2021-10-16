@@ -1,3 +1,6 @@
+v.1.3.2
+- Fix: in .NET 6 SDK that wasm-tools workload is installed, the transformation runs twice.
+
 v.1.3.1
 - Fix: the brotli loader wasn't injected on a .NET 6 Blazor app.
 
