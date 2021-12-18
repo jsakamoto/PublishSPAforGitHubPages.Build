@@ -4,7 +4,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using AngleSharp.Html.Dom;
@@ -144,7 +143,8 @@ namespace PublishSPAforGitHubPages.Build.Test
             actualIndexHtmlContents.Is(expectedIndexHtmlContents);
 
             using var sha256 = SHA256.Create();
-            var hash = "sha256-" + Convert.ToBase64String(sha256.ComputeHash(Encoding.ASCII.GetBytes(expectedIndexHtmlContents)));
+            var expectedIndexHtmlBytes = File.ReadAllBytes(expectedPublishedFiles["index.html"]);
+            var hash = "sha256-" + Convert.ToBase64String(sha256.ComputeHash(expectedIndexHtmlBytes));
 
             // Verify the file hash in the service worker assets manifest.
             var serviceWorkerAssetsJs = File.ReadAllText(expectedPublishedFiles["my-assets.js"]);

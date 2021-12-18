@@ -1,6 +1,7 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <UsingTask TaskName="PublishSPAforGHPages.RewriteIndexHtml" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
+  <UsingTask TaskName="PublishSPAforGHPages.RewriteServiceWorkerAssetsManifestJs" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
   <UsingTask TaskName="PublishSPAforGHPages.RecompressStaticFile" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
   <UsingTask TaskName="PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
 
@@ -26,6 +27,7 @@
       <GHPagesIndexHtml Condition="'$(GHPagesIndexHtml)'==''">$(GHPagesRoot)index.html</GHPagesIndexHtml>
       <GHPages404Html Condition="'$(GHPages404Html)'==''">$(GHPagesRoot)404.html</GHPages404Html>
       <GHPagesDotnetWasm Condition="'$(GHPagesDotnetWasm)'==''">$(GHPagesRoot)_framework\dotnet.wasm</GHPagesDotnetWasm>
+      <GHPagesSvcWorkerAssetsJs Condition="'$(GHPagesSvcWorkerAssetsJs)'==''">$(GHPagesRoot)$(ServiceWorkerAssetsManifest)</GHPagesSvcWorkerAssetsJs>
       <GHPagesCompressGz>false</GHPagesCompressGz>
       <GHPagesCompressGz Condition="Exists('$(GHPagesDotnetWasm).gz')">true</GHPagesCompressGz>
       <GHPagesCompressBr>false</GHPagesCompressBr>
@@ -62,11 +64,18 @@
   <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element) -->
   <Target Name="PublishSPAforGHPages_RewriteIndexHtml" AfterTargets="Publish" Condition=" '$(GHPagesBase)' != '' "
           DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <PublishSPAforGHPages.RewriteIndexHtml Condition="Exists($(GHPagesIndexHtml))"
-                                           File="$(GHPagesIndexHtml)"
-                                           InjectBrotliLoader="$(GHPagesInjectBrotliLoader)"
-                                           BaseHref="$(GHPagesBase)"
-                                           Recursive="$(GHPagesRecursive)"/>
+    <PublishSPAforGHPages.RewriteIndexHtml 
+      Condition="Exists($(GHPagesIndexHtml))"
+      File="$(GHPagesIndexHtml)"
+      InjectBrotliLoader="$(GHPagesInjectBrotliLoader)"
+      BaseHref="$(GHPagesBase)"
+      Recursive="$(GHPagesRecursive)"/>
+
+    <PublishSPAforGHPages.RewriteServiceWorkerAssetsManifestJs
+      Condition="Exists($(GHPagesIndexHtml)) AND Exists($(GHPagesSvcWorkerAssetsJs))"
+      IndexHtml="$(GHPagesIndexHtml)"
+      ServiceWorkerAssetsManifestJs="$(GHPagesSvcWorkerAssetsJs)"
+      InjectBrotliLoader="$(GHPagesInjectBrotliLoader)" />
   </Target>
 
   <!-- Copy index.html to 404.html -->

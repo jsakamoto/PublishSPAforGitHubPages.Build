@@ -7,7 +7,7 @@
     <LangVersion>Latest</LangVersion>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <Authors>J.Sakamoto</Authors>
-    <Version>1.3.2</Version>
+    <Version>1.3.3</Version>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jsakamoto/PublishSPAforGitHubPages.Build</PackageProjectUrl>
     <PackageTags>spa,github,gh-pages,github pages,githubpages</PackageTags>
