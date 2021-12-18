@@ -5,8 +5,8 @@ using System.IO.Compression;
 using System.Linq;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
-using PublishSPAforGitHubPages.Build.Test.Internals;
 using NUnit.Framework;
+using PublishSPAforGitHubPages.Build.Test.Internals;
 using static PublishSPAforGitHubPages.Build.Test.Internals.Shell;
 
 namespace PublishSPAforGitHubPages.Build.Test
@@ -29,7 +29,7 @@ namespace PublishSPAforGitHubPages.Build.Test
 
         private string GetBaseHref(string indexHtmlPath)
         {
-            using var indexHtmlDoc = _Parser.ParseDocument(File.ReadAllText(indexHtmlPath));
+            using var indexHtmlDoc = this._Parser.ParseDocument(File.ReadAllText(indexHtmlPath));
             return indexHtmlDoc.Head.Children.OfType<IHtmlBaseElement>().First().Href;
         }
 
@@ -53,7 +53,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
             // and, the base URL is not rewrited.
-            GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
+            this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
 
             // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
             Delete(Path.Combine(projectDir, "public"));
@@ -61,7 +61,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
             // and, the base URL is rewrited to project sub path.
-            GetBaseHref(publishedIndexHtmlPath).Is("/fizz.buzz/");
+            this.GetBaseHref(publishedIndexHtmlPath).Is("/fizz.buzz/");
 
             // Validate that the "404.html" is a copy of the "index.html".
             var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
@@ -93,7 +93,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
             // and, the base URL is not rewrited.
-            GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
+            this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
 
             // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
             Delete(Path.Combine(projectDir, "public"));
@@ -101,7 +101,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
             // and, the base URL is rewrited to root path.
-            GetBaseHref(publishedIndexHtmlPath).Is("/");
+            this.GetBaseHref(publishedIndexHtmlPath).Is("/");
 
             // Validate that the "404.html" is a copy of the "index.html".
             var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
@@ -129,7 +129,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             var actualPublishedFiles = Directory.GetFiles(publishedFilesDir).OrderBy(name => name).ToArray();
 
             // compression files are not exists.
-            var expectedPublishedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "index.html", "favicon.ico" }
+            var expectedPublishedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "index.html", "favicon.ico", "manifest.json", "service-worker.js", "my-assets.js" }
                 .ToDictionary(name => name, name => Path.Combine(publishedFilesDir, name));
             actualPublishedFiles.Is(expectedPublishedFiles.Values.OrderBy(name => name));
 
