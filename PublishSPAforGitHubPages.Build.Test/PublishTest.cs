@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using NUnit.Framework;
+using PublishSPAforGHPages.Models;
 using PublishSPAforGitHubPages.Build.Test.Internals;
 using static PublishSPAforGitHubPages.Build.Test.Internals.Shell;
 
@@ -137,6 +142,22 @@ namespace PublishSPAforGitHubPages.Build.Test
             var expectedIndexHtmlContents = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "StaticFiles", "Rewrited", "index - brotli loader is not injected.html"));
             var actualIndexHtmlContents = File.ReadAllText(expectedPublishedFiles["index.html"]);
             actualIndexHtmlContents.Is(expectedIndexHtmlContents);
+
+            using var sha256 = SHA256.Create();
+            var hash = "sha256-" + Convert.ToBase64String(sha256.ComputeHash(Encoding.ASCII.GetBytes(expectedIndexHtmlContents)));
+
+            // Verify the file hash in the service worker assets manifest.
+            var serviceWorkerAssetsJs = File.ReadAllText(expectedPublishedFiles["my-assets.js"]);
+            serviceWorkerAssetsJs = Regex.Replace(serviceWorkerAssetsJs, @"^self\.assetsManifest\s*=\s*", "");
+            serviceWorkerAssetsJs = Regex.Replace(serviceWorkerAssetsJs, ";\\s*$", "");
+            var assetsManifestFile = JsonSerializer.Deserialize<AssetsManifestFile>(serviceWorkerAssetsJs);
+
+            var assetManifestEntry = assetsManifestFile?.assets?.First(a => a.url == "index.html");
+            assetManifestEntry.IsNotNull();
+            assetManifestEntry.hash.Is(hash);
+
+            // Verify the assets manifest doesn't include compressed file path such as ".dll.br" or ".dll.bz".
+            assetsManifestFile.assets.Any(a => a.url.EndsWith(".br") || a.url.EndsWith(".bz")).IsFalse();
         }
 
         private static void ValidateRecompression(string htmlPath, byte[] htmlBytes)
