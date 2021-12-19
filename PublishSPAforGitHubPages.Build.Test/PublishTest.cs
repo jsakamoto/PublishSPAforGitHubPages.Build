@@ -6,11 +6,13 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using NUnit.Framework;
 using PublishSPAforGHPages.Models;
 using PublishSPAforGitHubPages.Build.Test.Internals;
+using Toolbelt.Diagnostics;
 using static PublishSPAforGitHubPages.Build.Test.Internals.Shell;
 
 namespace PublishSPAforGitHubPages.Build.Test
@@ -158,6 +160,19 @@ namespace PublishSPAforGitHubPages.Build.Test
 
             // Verify the assets manifest doesn't include compressed file path such as ".dll.br" or ".dll.bz".
             assetsManifestFile.assets.Any(a => a.url.EndsWith(".br") || a.url.EndsWith(".bz")).IsFalse();
+        }
+
+        [Test]
+        public async Task Publish_NonPWA_Test()
+        {
+            using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");
+            var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleAppNonPWA");
+            var projectDir = Path.Combine(workDir, "WorkDir");
+            XcopyDir(projectSrcDir, projectDir);
+
+            var dotnetCLI = XProcess.Start("dotnet", "publish -c:Release -o:public -p:BlazorEnableCompression=false -p:GHPages=true", projectDir);
+            await dotnetCLI.WaitForExitAsync();
+            dotnetCLI.ExitCode.Is(0, message: dotnetCLI.Output);
         }
 
         private static void ValidateRecompression(string htmlPath, byte[] htmlBytes)

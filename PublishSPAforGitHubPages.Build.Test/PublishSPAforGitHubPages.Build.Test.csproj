@@ -20,21 +20,11 @@
     <ProjectReference Include="..\PublishSPAforGitHubPages.Build\PublishSPAforGitHubPages.Build.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Fixtures/**/*" />
     <Compile Remove="Fixtures/**/*" />
     <Content Include="Fixtures/**/*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Fixtures\SampleApp\wwwroot\manifest.json" />
-    <None Remove="Fixtures\SampleApp\wwwroot\service-worker.js" />
-    <None Remove="Fixtures\SampleApp\wwwroot\service-worker.published.js" />
-    <None Remove="Fixtures\StaticFiles\Rewrited\index - brotli loader is not injected.html" />
-    <None Remove="Fixtures\StaticFiles\Rewrited\index - no blazor.html" />
-    <None Remove="Fixtures\StaticFiles\Rewrited\index.html" />
-    <None Remove="Fixtures\StaticFiles\Source\index - autostart is true.html" />
-    <None Remove="Fixtures\StaticFiles\Source\index - no autostart.html" />
-    <None Remove="Fixtures\StaticFiles\Source\index - no blazor.html" />
   </ItemGroup>
 
 </Project>
