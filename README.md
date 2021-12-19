@@ -7,6 +7,7 @@ This is a NuGet package that provides post published processing to deploy the .N
 - **Rewriting base URL** in `index.html`
 - Generating `.nojekyll`,  `.gitattributes`, and **`404.html`**.
 - Make it to be fetching assembly files (**"~.dll.br"**) that are **pre-compressed by the Brotli** algorithm. (if the site is a Blazor WebAssembly site.)
+- **PWA support** (rewriting file hash in the service worker assets manifest file (ex.`service-worker-assets.js`) to latest valid file hash)
 
 ![image](https://raw.githubusercontent.com/jsakamoto/PublishSPAforGitHubPages.Build/master/.assets/social-media.png)
 
@@ -104,7 +105,9 @@ This package does the following steps after publishing of the .NET Core SPA proj
 - Rewriting the URL in `<base href="..."/>` element in the `index.html` to fit the GitHub page URL.
 - Copy the `index.html` to the `404.html`.
 - Generate `.nojekyll` file and `.gitattributes` file.
-- Enable fetching pre-compressed assembly files. (for a Blazor WebAssembly site)
+- **[Pre-compression support for Blazor WebAssembly]** Enable fetching pre-compressed assembly files. (for a Blazor WebAssembly site)
+- **[PWA Support]** Rewrite the hash code of the `index.html` in the service worker assets manifest file (ex.`service-worker-assets.js`) if it exists.
+- **[PWA Support for Blazor WebAssembly]** Rewrite all of the hash codes of files that are "Brotli" compressed in the service worker assets manifest file (ex.`service-worker-assets.js`) if the manifest file exists and fetching pre-compressed assembly files is enabled.
 
 ### Working folder
 
@@ -155,11 +158,11 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.202
+          dotnet-version: 6.0.101
 
       # Publish the site
       - name: Publish
-        run: dotnet publish {YourSolution}.sln -c Release -o public -p:GHPages=true
+        run: dotnet publish {YourSolution}.sln -c:Release -o:public -p:GHPages=true
 
       # Deploy the site
       - name: Deploy
