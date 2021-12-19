@@ -36,7 +36,8 @@ namespace PublishSPAforGHPages
             if (assetManifestEntry == null) return false;
             assetManifestEntry.hash = GetHashCode(sha256, this.IndexHtml);
 
-            // If the Brotli Loader is enabled, update all hash codes of asset entries that are compressed.
+            // If the Brotli Loader is enabled, update all hash codes of asset entries that are compressed,
+            // and add asset entries for brotli loader JavaScript files.
             if (this.InjectBrotliLoader)
             {
                 foreach (var asset in assetsManifestFile.assets)
@@ -53,6 +54,17 @@ namespace PublishSPAforGHPages
                     asset.url += ".br";
                     asset.hash = GetHashCode(sha256, compressedPath);
                 }
+
+                var brotliLoaderScriptFiles = new[] { "decode.min.js", "brotliloader.min.js" };
+                var brotliLoaderScriptEntries = brotliLoaderScriptFiles.Select(name =>
+                {
+                    return new AssetsManifestFileEntry
+                    {
+                        url = name,
+                        hash = GetHashCode(sha256, Path.Combine(this.WebRootPath, name))
+                    };
+                });
+                assetsManifestFile.assets = assetsManifestFile.assets.Concat(brotliLoaderScriptEntries).ToArray();
             }
 
             // Write back the model object to the "service-worker-assets.js"

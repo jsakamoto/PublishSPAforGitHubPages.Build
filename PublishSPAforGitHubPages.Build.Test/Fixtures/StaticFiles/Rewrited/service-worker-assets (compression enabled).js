@@ -43,6 +43,14 @@
     {
       "hash": "sha256-yzFf+O\/mlH+Q9klUSqXP2kxGKOUFLPxaww8da8fKhGU=",
       "url": "sample-data\/weather.json"
+    },
+    {
+      "hash": "sha256-\/X8YJ7pxGO9Bt7DtF2Ymg6DI8R5VgvMwQJ1AoKSwzpA=",
+      "url": "decode.min.js"
+    },
+    {
+      "hash": "sha256-hVqBXS\/\/4X1YUi83AFOCTLWaM96TWMyV7amEbpYYi3M=",
+      "url": "brotliloader.min.js"
     }
   ],
   "version": "3PIn0Rn+"

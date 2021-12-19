@@ -53,6 +53,7 @@ namespace PublishSPAforGitHubPages.Build.Test
 
             // Then
             var actualAssetsText = File.ReadAllText(task.ServiceWorkerAssetsManifestJs).TrimEnd('\r', '\n');
+            // NOTE: "service-worker-assets (compression enabled).js" includes "decode.min.js" and "brotliloader.min.js".
             var expectedAssetsText = File.ReadAllText(Path.Combine(fixtureDir, "StaticFiles", "Rewrited", "service-worker-assets (compression enabled).js")).TrimEnd('\r', '\n');
             actualAssetsText.Is(expectedAssetsText);
         }
