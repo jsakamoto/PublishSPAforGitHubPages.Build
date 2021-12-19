@@ -9,31 +9,31 @@
       "url": "_framework\/dotnet.6.0.1.9sru9350xc.js"
     },
     {
-      "hash": "sha256-MSlKZuLHfzsKLVF\/3omAUcZ57QL0puRif12PGTAXwDY=",
-      "url": "_framework\/dotnet.timezones.blat"
+      "hash": "sha256-4lgMKe2exBv2sSd53QL7uQzl1RvGukYA1UyYe\/ALovE=",
+      "url": "_framework\/dotnet.timezones.blat.br"
     },
     {
-      "hash": "sha256-GuySSCXngMFRsFNXg0w0zohV31TNKJ+mSSGKRqubLbA=",
-      "url": "_framework\/dotnet.wasm"
+      "hash": "sha256-37xUZE\/K\/aAw3ZJ\/g+KJcY30Q0yGj0y7bBxvF2w+jBo=",
+      "url": "_framework\/dotnet.wasm.br"
     },
     {
-      "hash": "sha256-4RwaPx87Z4dvn77ie\/ro3\/QzyS+\/gGmO3Y\/0CSAXw4k=",
-      "url": "_framework\/icudt_EFIGS.dat"
+      "hash": "sha256-q1w1h2vNUqc6dJtChoY\/ZrKpxORnETdYj6KtoxZQczo=",
+      "url": "_framework\/icudt_EFIGS.dat.br"
     },
     {
-      "hash": "sha256-3VjpFi3z4oUNwUGu1hZoB8hobncusEBAzYjck456oVg=",
-      "url": "_framework\/blazor.boot.json"
+      "hash": "sha256-OsDeskpk+YUX62i\/8S7GkvTksxtC6JY47N8BwOWOcYU=",
+      "url": "_framework\/blazor.boot.json.br"
     },
     {
-      "hash": "sha256-ArIsY3757qWf4U40toP8gqEw4uK1YzpiZv1MvZ0eYew=",
-      "url": "_framework\/Microsoft.AspNetCore.Components.dll"
+      "hash": "sha256-gBwWKjsIR51kUzgMOXv9+w8\/RAB8HsAiOb+qoQkofgY=",
+      "url": "_framework\/Microsoft.AspNetCore.Components.dll.br"
     },
     {
       "hash": "sha256-qdPUDON7SGALrOQaLUgb5RuPIVy\/KZJqKDox127i\/ns=",
       "url": "_framework\/Microsoft.AspNetCore.Components.Web.dll"
     },
     {
-      "hash": "sha256-xF0uBezR3YZgpGE7CXVz83Wi7t\/+mci7KNdUi7oEFSA=",
+      "hash": "sha256-O9ULl7YGHIfSqKy1Fq25T79I4nrARb7pR8isBtdnpMY=",
       "url": "index.html"
     },
     {

@@ -73,6 +73,7 @@
 
     <PublishSPAforGHPages.RewriteServiceWorkerAssetsManifestJs
       Condition="Exists($(GHPagesIndexHtml)) AND Exists($(GHPagesSvcWorkerAssetsJs))"
+      WebRootPath="$(GHPagesRoot)"
       IndexHtml="$(GHPagesIndexHtml)"
       ServiceWorkerAssetsManifestJs="$(GHPagesSvcWorkerAssetsJs)"
       InjectBrotliLoader="$(GHPagesInjectBrotliLoader)" />
