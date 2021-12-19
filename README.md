@@ -98,6 +98,28 @@ Another way, create publish profile file (.pubxml) and edit it to append `GHPage
 </Project>
 ```
 
+## PWA offline support
+
+If the app you deployed is a Blazor WebAssembly PWA and its offline support is needed, **you have to include ".br" extension files to offline assets __explicitly__**.
+
+For example, the case of a Blazor WebAssembly PWA project generated from the standard project template, that project has "service-worker.published.js" like this:
+
+```js
+// service-worker.published.js
+...
+const offlineAssetsInclude = [/\.dll$/, ..., /\.dat$/];
+...
+```
+
+Then **you have to change the "service-worker.published.js" manually to add the ".br" file pattern to the offline assets list**, like this:
+
+```js
+// service-worker.published.js
+...
+const offlineAssetsInclude = [/\.dll$/, ..., /\.dat$/, /\.br$/];
+...
+```
+
 ## What does this package do when publishing the project
 
 This package does the following steps after publishing of the .NET Core SPA project when the `GHPages` MSBuild property is `true`.
