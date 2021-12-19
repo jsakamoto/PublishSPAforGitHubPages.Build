@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
-using PublishSPAforGitHubPages.Build.Test.Internals;
 using NUnit.Framework;
+using PublishSPAforGHPages.Models;
+using PublishSPAforGitHubPages.Build.Test.Internals;
 using static PublishSPAforGitHubPages.Build.Test.Internals.Shell;
 
 namespace PublishSPAforGitHubPages.Build.Test
@@ -29,7 +33,7 @@ namespace PublishSPAforGitHubPages.Build.Test
 
         private string GetBaseHref(string indexHtmlPath)
         {
-            using var indexHtmlDoc = _Parser.ParseDocument(File.ReadAllText(indexHtmlPath));
+            using var indexHtmlDoc = this._Parser.ParseDocument(File.ReadAllText(indexHtmlPath));
             return indexHtmlDoc.Head.Children.OfType<IHtmlBaseElement>().First().Href;
         }
 
@@ -53,7 +57,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
             // and, the base URL is not rewrited.
-            GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
+            this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
 
             // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
             Delete(Path.Combine(projectDir, "public"));
@@ -61,7 +65,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
             // and, the base URL is rewrited to project sub path.
-            GetBaseHref(publishedIndexHtmlPath).Is("/fizz.buzz/");
+            this.GetBaseHref(publishedIndexHtmlPath).Is("/fizz.buzz/");
 
             // Validate that the "404.html" is a copy of the "index.html".
             var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
@@ -93,7 +97,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
             // and, the base URL is not rewrited.
-            GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
+            this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
 
             // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
             Delete(Path.Combine(projectDir, "public"));
@@ -101,7 +105,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
             // and, the base URL is rewrited to root path.
-            GetBaseHref(publishedIndexHtmlPath).Is("/");
+            this.GetBaseHref(publishedIndexHtmlPath).Is("/");
 
             // Validate that the "404.html" is a copy of the "index.html".
             var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
@@ -129,7 +133,7 @@ namespace PublishSPAforGitHubPages.Build.Test
             var actualPublishedFiles = Directory.GetFiles(publishedFilesDir).OrderBy(name => name).ToArray();
 
             // compression files are not exists.
-            var expectedPublishedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "index.html", "favicon.ico" }
+            var expectedPublishedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "index.html", "favicon.ico", "manifest.json", "service-worker.js", "my-assets.js" }
                 .ToDictionary(name => name, name => Path.Combine(publishedFilesDir, name));
             actualPublishedFiles.Is(expectedPublishedFiles.Values.OrderBy(name => name));
 
@@ -137,6 +141,23 @@ namespace PublishSPAforGitHubPages.Build.Test
             var expectedIndexHtmlContents = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "StaticFiles", "Rewrited", "index - brotli loader is not injected.html"));
             var actualIndexHtmlContents = File.ReadAllText(expectedPublishedFiles["index.html"]);
             actualIndexHtmlContents.Is(expectedIndexHtmlContents);
+
+            using var sha256 = SHA256.Create();
+            var expectedIndexHtmlBytes = File.ReadAllBytes(expectedPublishedFiles["index.html"]);
+            var hash = "sha256-" + Convert.ToBase64String(sha256.ComputeHash(expectedIndexHtmlBytes));
+
+            // Verify the file hash in the service worker assets manifest.
+            var serviceWorkerAssetsJs = File.ReadAllText(expectedPublishedFiles["my-assets.js"]);
+            serviceWorkerAssetsJs = Regex.Replace(serviceWorkerAssetsJs, @"^self\.assetsManifest\s*=\s*", "");
+            serviceWorkerAssetsJs = Regex.Replace(serviceWorkerAssetsJs, ";\\s*$", "");
+            var assetsManifestFile = JsonSerializer.Deserialize<AssetsManifestFile>(serviceWorkerAssetsJs);
+
+            var assetManifestEntry = assetsManifestFile?.assets?.First(a => a.url == "index.html");
+            assetManifestEntry.IsNotNull();
+            assetManifestEntry.hash.Is(hash);
+
+            // Verify the assets manifest doesn't include compressed file path such as ".dll.br" or ".dll.bz".
+            assetsManifestFile.assets.Any(a => a.url.EndsWith(".br") || a.url.EndsWith(".bz")).IsFalse();
         }
 
         private static void ValidateRecompression(string htmlPath, byte[] htmlBytes)

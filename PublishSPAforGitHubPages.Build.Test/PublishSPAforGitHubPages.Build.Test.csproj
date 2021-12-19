@@ -8,10 +8,12 @@
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.16.1" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.11.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
     <PackageReference Include="ChainingAssertion-NUnit.Bin" Version="1.8.0.3" />
+    <PackageReference Include="Toolbelt.WorkDirectory" Version="1.0.0" />
+    <PackageReference Include="XProcess" Version="1.0.0-beta.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +26,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Fixtures\SampleApp\wwwroot\manifest.json" />
+    <None Remove="Fixtures\SampleApp\wwwroot\service-worker.js" />
+    <None Remove="Fixtures\SampleApp\wwwroot\service-worker.published.js" />
     <None Remove="Fixtures\StaticFiles\Rewrited\index - brotli loader is not injected.html" />
     <None Remove="Fixtures\StaticFiles\Rewrited\index - no blazor.html" />
     <None Remove="Fixtures\StaticFiles\Rewrited\index.html" />
