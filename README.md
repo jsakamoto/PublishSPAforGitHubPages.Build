@@ -184,14 +184,14 @@ jobs:
 
       # Publish the site
       - name: Publish
-        run: dotnet publish {YourSolution}.sln -c:Release -o:public -p:GHPages=true
+        run: dotnet publish {YourSolution}.sln -c:Release -o:publish -p:GHPages=true
 
       # Deploy the site
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: public/wwwroot
+          publish_dir: publish/wwwroot
           force_orphan: true
 ```
 
