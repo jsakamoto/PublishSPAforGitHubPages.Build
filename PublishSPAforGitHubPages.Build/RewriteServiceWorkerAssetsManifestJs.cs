@@ -16,8 +16,6 @@ namespace PublishSPAforGHPages
     {
         [Required] public string WebRootPath { get; set; }
 
-        [Required] public string IndexHtml { get; set; }
-
         [Required] public string ServiceWorkerAssetsManifestJs { get; set; }
 
         public bool InjectBrotliLoader { get; set; } = true;
@@ -32,9 +30,11 @@ namespace PublishSPAforGHPages
             using var sha256 = SHA256.Create();
 
             // Update a hash code of a "index.html".
-            var assetManifestEntry = assetsManifestFile.assets.FirstOrDefault(a => this.GetFullPath(a) == this.IndexHtml);
-            if (assetManifestEntry == null) return false;
-            assetManifestEntry.hash = GetHashCode(sha256, this.IndexHtml);
+            var indexHtmlAssets = assetsManifestFile.assets.Where(a => a.url.EndsWith("/index.html") || a.url == "index.html");
+            foreach (var indexHtmlAsset in indexHtmlAssets)
+            {
+                indexHtmlAsset.hash = GetHashCode(sha256, this.GetFullPath(indexHtmlAsset));
+            }
 
             // If the Brotli Loader is enabled, update all hash codes of asset entries that are compressed,
             // and add asset entries for brotli loader JavaScript files.

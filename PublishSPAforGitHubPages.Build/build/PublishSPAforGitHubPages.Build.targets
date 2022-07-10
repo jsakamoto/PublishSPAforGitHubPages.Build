@@ -23,7 +23,7 @@
   <!-- Define Properties -->
   <Target Name="PublishSPAforGHPages_DefineProperties" DependsOnTargets="$(BeforePublishSPAforGHPages)">
     <PropertyGroup>
-      <GHPagesRoot Condition="'$(GHPagesRoot)'==''">$(PublishDir)wwwroot\</GHPagesRoot>
+      <GHPagesRoot Condition="'$(GHPagesRoot)'==''">$([System.IO.Path]::GetFullPath($(PublishDir)wwwroot))\</GHPagesRoot>
       <GHPagesIndexHtml Condition="'$(GHPagesIndexHtml)'==''">$(GHPagesRoot)index.html</GHPagesIndexHtml>
       <GHPages404Html Condition="'$(GHPages404Html)'==''">$(GHPagesRoot)404.html</GHPages404Html>
       <GHPagesDotnetWasm Condition="'$(GHPagesDotnetWasm)'==''">$(GHPagesRoot)_framework\dotnet.wasm</GHPagesDotnetWasm>
@@ -47,47 +47,46 @@
 
   <!-- Generate ".nojekyll" file -->
   <Target Name="PublishSPAforGHPages_GenerateNoJekyll" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <WriteLinesToFile File="$(GHPagesRoot).nojekyll" Overwrite="false"/>
+    <WriteLinesToFile File="$(GHPagesRoot).nojekyll" Overwrite="false" />
   </Target>
 
   <!-- Generate ".gitattributes" file -->
   <Target Name="PublishSPAforGHPages_GenerateGitAttributes" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <WriteLinesToFile File="$(GHPagesRoot).gitattributes" Lines="* -text" Overwrite="true" Condition="!Exists('$(GHPagesRoot).gitattributes')"/>
+    <WriteLinesToFile File="$(GHPagesRoot).gitattributes" Lines="* -text" Overwrite="true" Condition="!Exists('$(GHPagesRoot).gitattributes')" />
   </Target>
 
   <!-- Copy brotrli loader script files -->
   <Target Name="PublishSPAforGHPages_CopyBrotliLoader" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' AND '$(GHPagesInjectBrotliLoader)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)../bundle/scripts/decode.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)decode.min.js')"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)../bundle/scripts/brotliloader.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)brotliloader.min.js')"/>
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../bundle/scripts/decode.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)decode.min.js')" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../bundle/scripts/brotliloader.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)brotliloader.min.js')" />
   </Target>
 
   <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element) -->
   <Target Name="PublishSPAforGHPages_RewriteIndexHtml" AfterTargets="Publish" Condition=" '$(GHPagesBase)' != '' "
-          DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <PublishSPAforGHPages.RewriteIndexHtml 
+    DependsOnTargets="PublishSPAforGHPages_DefineProperties">
+    <PublishSPAforGHPages.RewriteIndexHtml
       Condition="Exists($(GHPagesIndexHtml))"
       File="$(GHPagesIndexHtml)"
       InjectBrotliLoader="$(GHPagesInjectBrotliLoader)"
       BaseHref="$(GHPagesBase)"
-      Recursive="$(GHPagesRecursive)"/>
+      Recursive="$(GHPagesRecursive)" />
 
     <PublishSPAforGHPages.RewriteServiceWorkerAssetsManifestJs
       Condition=" '$(GHPagesSvcWorkerAssetsJs)' != '' AND Exists($(GHPagesIndexHtml)) AND Exists($(GHPagesSvcWorkerAssetsJs))"
       WebRootPath="$(GHPagesRoot)"
-      IndexHtml="$(GHPagesIndexHtml)"
       ServiceWorkerAssetsManifestJs="$(GHPagesSvcWorkerAssetsJs)"
       InjectBrotliLoader="$(GHPagesInjectBrotliLoader)" />
   </Target>
 
   <!-- Copy index.html to 404.html -->
   <Target Name="PublishSPAforGHPages_Generate404html" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' "
-          DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteIndexHtml">
-    <Copy SourceFiles="$(GHPagesIndexHtml)" DestinationFiles="$(GHPages404Html)" Condition="Exists($(GHPagesIndexHtml))"/>
+    DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteIndexHtml">
+    <Copy SourceFiles="$(GHPagesIndexHtml)" DestinationFiles="$(GHPages404Html)" Condition="Exists($(GHPagesIndexHtml))" />
   </Target>
 
   <!-- Recompress static files -->
   <Target Name="PublishSPAforGHPages_RecompressStaticFiles" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' "
-          DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteIndexHtml;PublishSPAforGHPages_Generate404html">
+    DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteIndexHtml;PublishSPAforGHPages_Generate404html">
     <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPagesIndexHtml))" File="$(GHPagesIndexHtml)" EnableGzip="$(GHPagesCompressIndexGz)" EnableBrotli="$(GHPagesCompressIndexBr)" Recursive="$(GHPagesRecursive)" />
     <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPages404Html))" File="$(GHPages404Html)" EnableGzip="$(GHPagesCompressIndexGz)" EnableBrotli="$(GHPagesCompressIndexBr)" Recursive="$(GHPagesRecursive)" />
   </Target>
