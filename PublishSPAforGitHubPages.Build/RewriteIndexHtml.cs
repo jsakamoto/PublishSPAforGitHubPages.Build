@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
@@ -34,7 +33,7 @@ namespace PublishSPAforGHPages
             var targetFiles = Directory.GetFiles(baseDir, fileName, searchOption);
             foreach (var targeFile in targetFiles)
             {
-                Rewrite(targeFile);
+                this.Rewrite(targeFile);
             }
             return true;
         }
@@ -48,13 +47,13 @@ namespace PublishSPAforGHPages
             foreach (var line in lines)
             {
                 // rewrite "base href"
-                if (RewritedBaseHref(ref state, rewritedLines, line)) continue;
+                if (this.RewritedBaseHref(ref state, rewritedLines, line)) continue;
 
                 // set autostart of the blazor.webassembly.js to false
-                if (DisabledAutoStart(ref state, rewritedLines, line)) continue;
+                if (this.DisabledAutoStart(ref state, rewritedLines, line)) continue;
 
                 // inject brotli loader
-                if (InjectedBrotliLoader(ref state, rewritedLines, line)) continue;
+                if (this.InjectedBrotliLoader(ref state, rewritedLines, line)) continue;
 
                 rewritedLines.Add(line);
             }
@@ -73,7 +72,7 @@ namespace PublishSPAforGHPages
             if (m.Success)
             {
                 state.RewitedBaseHref = true;
-                var rewritedLine = line.Substring(0, m.Index) + m.Groups[1].Value + BaseHref + m.Groups[3].Value;
+                var rewritedLine = line.Substring(0, m.Index) + m.Groups[1].Value + this.BaseHref + m.Groups[3].Value;
                 if (line != rewritedLine)
                 {
                     state.HasChanged = true;
@@ -87,7 +86,7 @@ namespace PublishSPAforGHPages
 
         private bool DisabledAutoStart(ref State state, List<string> rewritedLines, string line)
         {
-            if (!InjectBrotliLoader) return false;
+            if (!this.InjectBrotliLoader) return false;
             if (state.DisabledAutoStartOfBlazorWasmLoader) return false;
 
             var m = Regex.Match(line, @"(<script[^>]+src=""_framework/blazor.webassembly.js""[^>]*)(></script>.*)");
@@ -116,7 +115,7 @@ namespace PublishSPAforGHPages
 
         private bool InjectedBrotliLoader(ref State state, List<string> rewritedLines, string line)
         {
-            if (!InjectBrotliLoader) return false;
+            if (!this.InjectBrotliLoader) return false;
             if (state.InjectedBrotliLoader) return false;
 
             if (line.TrimStart().StartsWith(@"<script src=""decode.min.js"""))

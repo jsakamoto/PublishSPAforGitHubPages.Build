@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using NUnit.Framework;
 using PublishSPAforGHPages;
 using PublishSPAforGitHubPages.Build.Test.Internals;
-using NUnit.Framework;
 
 namespace PublishSPAforGitHubPages.Build.Test
 {
