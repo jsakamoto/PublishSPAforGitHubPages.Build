@@ -1,3 +1,6 @@
+v.2.0.0
+- Improve pre-rendering support by updating all html files inside the published folder by default.
+
 v.1.3.7
 - Fix: PWA support - some asset entries in `service-worker-assets.js` are not updated correctly.
 

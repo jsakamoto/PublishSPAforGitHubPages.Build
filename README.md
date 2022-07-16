@@ -178,9 +178,9 @@ jobs:
 
       # Install .NET Core SDK
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 6.0.101
+          dotnet-version: 6.0.x
 
       # Publish the site
       - name: Publish
