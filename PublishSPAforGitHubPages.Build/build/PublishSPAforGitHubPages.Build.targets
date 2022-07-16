@@ -24,6 +24,7 @@
   <Target Name="PublishSPAforGHPages_DefineProperties" DependsOnTargets="$(BeforePublishSPAforGHPages)">
     <PropertyGroup>
       <GHPagesRoot Condition="'$(GHPagesRoot)'==''">$([System.IO.Path]::GetFullPath($(PublishDir)wwwroot))\</GHPagesRoot>
+      <GHPagesRewriteHtmlFileSearchPattern Condition=" '$(GHPagesRewriteHtmlFileSearchPattern)' == '' ">*.html</GHPagesRewriteHtmlFileSearchPattern>
       <GHPagesIndexHtml Condition="'$(GHPagesIndexHtml)'==''">$(GHPagesRoot)index.html</GHPagesIndexHtml>
       <GHPages404Html Condition="'$(GHPages404Html)'==''">$(GHPagesRoot)404.html</GHPages404Html>
       <GHPagesDotnetWasm Condition="'$(GHPagesDotnetWasm)'==''">$(GHPagesRoot)_framework\dotnet.wasm</GHPagesDotnetWasm>
@@ -61,12 +62,13 @@
     <Copy SourceFiles="$(MSBuildThisFileDirectory)../bundle/scripts/brotliloader.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)brotliloader.min.js')" />
   </Target>
 
-  <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element) -->
+  <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element, and inject Brotli loader) -->
   <Target Name="PublishSPAforGHPages_RewriteIndexHtml" AfterTargets="Publish" Condition=" '$(GHPagesBase)' != '' "
     DependsOnTargets="PublishSPAforGHPages_DefineProperties">
     <PublishSPAforGHPages.RewriteIndexHtml
       Condition="Exists($(GHPagesIndexHtml))"
-      File="$(GHPagesIndexHtml)"
+      WebRootPath="$(GHPagesRoot)"
+      FileSearchPatterns="$(GHPagesRewriteHtmlFileSearchPattern)"
       InjectBrotliLoader="$(GHPagesInjectBrotliLoader)"
       BaseHref="$(GHPagesBase)"
       Recursive="$(GHPagesRecursive)" />

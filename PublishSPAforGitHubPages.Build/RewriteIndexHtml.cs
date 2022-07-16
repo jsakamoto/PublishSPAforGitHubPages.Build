@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 
@@ -8,7 +9,10 @@ namespace PublishSPAforGHPages
     public class RewriteIndexHtml : Microsoft.Build.Utilities.Task
     {
         [Required]
-        public string File { get; set; }
+        public string WebRootPath { get; set; }
+
+        [Required]
+        public string FileSearchPatterns { get; set; }
 
         public bool InjectBrotliLoader { get; set; } = true;
 
@@ -27,13 +31,15 @@ namespace PublishSPAforGHPages
 
         public override bool Execute()
         {
-            var fileName = Path.GetFileName(this.File);
-            var baseDir = Path.GetDirectoryName(this.File);
-            var searchOption = this.Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-            var targetFiles = Directory.GetFiles(baseDir, fileName, searchOption);
-            foreach (var targeFile in targetFiles)
+            var fileSearchPatterns = this.FileSearchPatterns.Split(';').Select(pattern => pattern.Trim()).Where(pattern => pattern != "");
+            foreach (var fileSearchPattern in fileSearchPatterns)
             {
-                this.Rewrite(targeFile);
+                var searchOption = this.Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+                var targetFiles = Directory.GetFiles(this.WebRootPath, fileSearchPattern, searchOption);
+                foreach (var targeFile in targetFiles)
+                {
+                    this.Rewrite(targeFile);
+                }
             }
             return true;
         }
