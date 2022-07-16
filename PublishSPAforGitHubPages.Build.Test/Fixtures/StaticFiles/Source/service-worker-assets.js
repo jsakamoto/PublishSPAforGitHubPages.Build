@@ -37,6 +37,14 @@
       "url": "index.html"
     },
     {
+      "hash": "sha256-MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MTI=",
+      "url": "counter.html"
+    },
+    {
+      "hash": "sha256-MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
+      "url": "fetchdata\/index.html"
+    },
+    {
       "hash": "sha256-sgU4p4LZHr10D4liDDbU2u1sbAHUvDP7pKyvKIuWKpg=",
       "url": "manifest.json"
     },

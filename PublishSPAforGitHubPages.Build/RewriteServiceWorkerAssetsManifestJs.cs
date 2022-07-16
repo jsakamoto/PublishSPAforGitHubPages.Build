@@ -30,10 +30,10 @@ namespace PublishSPAforGHPages
             using var sha256 = SHA256.Create();
 
             // Update a hash code of a "index.html".
-            var indexHtmlAssets = assetsManifestFile.assets.Where(a => a.url.EndsWith("/index.html") || a.url == "index.html");
-            foreach (var indexHtmlAsset in indexHtmlAssets)
+            var htmlAssets = assetsManifestFile.assets.Where(a => a.url.EndsWith(".html"));
+            foreach (var htmlAsset in htmlAssets)
             {
-                indexHtmlAsset.hash = GetHashCode(sha256, this.GetFullPath(indexHtmlAsset));
+                htmlAsset.hash = GetHashCode(sha256, this.GetFullPath(htmlAsset));
             }
 
             // If the Brotli Loader is enabled, update all hash codes of asset entries that are compressed,
