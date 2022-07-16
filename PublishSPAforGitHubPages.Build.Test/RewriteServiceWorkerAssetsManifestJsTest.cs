@@ -20,7 +20,6 @@ namespace PublishSPAforGitHubPages.Build.Test
             var task = new RewriteServiceWorkerAssetsManifestJs
             {
                 WebRootPath = workDir,
-                IndexHtml = Path.Combine(workDir, "index.html"),
                 ServiceWorkerAssetsManifestJs = Path.Combine(workDir, "service-worker-assets.js"),
                 InjectBrotliLoader = false
             };
@@ -45,7 +44,6 @@ namespace PublishSPAforGitHubPages.Build.Test
             var task = new RewriteServiceWorkerAssetsManifestJs
             {
                 WebRootPath = workDir,
-                IndexHtml = Path.Combine(workDir, "index.html"),
                 ServiceWorkerAssetsManifestJs = Path.Combine(workDir, "service-worker-assets.js"),
                 InjectBrotliLoader = true
             };
