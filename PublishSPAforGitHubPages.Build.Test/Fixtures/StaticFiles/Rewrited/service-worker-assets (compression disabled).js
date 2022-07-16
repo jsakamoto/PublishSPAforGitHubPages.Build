@@ -33,7 +33,7 @@
       "url": "_framework\/Microsoft.AspNetCore.Components.Web.dll"
     },
     {
-      "hash": "sha256-O9ULl7YGHIfSqKy1Fq25T79I4nrARb7pR8isBtdnpMY=",
+      "hash": "sha256-Mkn\/YePHoxvkLyCQOPC5\/m3c4DWo\/ePQ6tbGJOHorS4=",
       "url": "index.html"
     },
     {
