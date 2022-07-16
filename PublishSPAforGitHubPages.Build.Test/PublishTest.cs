@@ -13,7 +13,8 @@ using NUnit.Framework;
 using PublishSPAforGHPages.Models;
 using PublishSPAforGitHubPages.Build.Test.Internals;
 using Toolbelt.Diagnostics;
-using static PublishSPAforGitHubPages.Build.Test.Internals.Shell;
+using static Toolbelt.Diagnostics.XProcess;
+using static Toolbelt.FileIO;
 
 namespace PublishSPAforGitHubPages.Build.Test
 {
@@ -41,7 +42,7 @@ namespace PublishSPAforGitHubPages.Build.Test
 
         [Test]
         [TestCaseSource(nameof(TestPattern))]
-        public void Publish_ProjectSite_Test(string protocol, string subDir)
+        public async Task Publish_ProjectSite_Test(string protocol, string subDir)
         {
             using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol);
             var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
@@ -55,15 +56,15 @@ namespace PublishSPAforGitHubPages.Build.Test
             var published404HtmlPath = addedFiles["404.html"];
 
             // At first, normal publishing doesn't contain any additional files.
-            Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public").ExitCode.Is(0);
+            (await Start("dotnet", "publish -c:Release -o:public", projectDir).WaitForExitAsync()).ExitCode.Is(0);
             addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
             // and, the base URL is not rewrited.
             this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
 
             // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
-            Delete(Path.Combine(projectDir, "public"));
-            Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public", "-p:GHPages=true").ExitCode.Is(0);
+            DeleteDir(Path.Combine(projectDir, "public"));
+            (await Start("dotnet", "publish -c:Release -o:public -p:GHPages=true", projectDir).WaitForExitAsync()).ExitCode.Is(0);
             addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
             // and, the base URL is rewrited to project sub path.
@@ -79,9 +80,8 @@ namespace PublishSPAforGitHubPages.Build.Test
             ValidateRecompression(published404HtmlPath, _404HtmlBytes);
         }
 
-        [Test]
         [TestCaseSource(nameof(TestPattern))]
-        public void Publish_UserSite_Test(string protocol, string subDir)
+        public async Task Publish_UserSite_Test(string protocol, string subDir)
         {
             using var workDir = WorkDir.SetupWorkDir(siteType: "User", protocol);
             var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
@@ -95,15 +95,15 @@ namespace PublishSPAforGitHubPages.Build.Test
             var published404HtmlPath = addedFiles["404.html"];
 
             // At first, normal publishing doesn't contain any additional files.
-            Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public").ExitCode.Is(0);
+            (await Start("dotnet", "publish -c:Release -o:public", projectDir).WaitForExitAsync()).ExitCode.Is(0);
             addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
             // and, the base URL is not rewrited.
             this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
 
             // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
-            Delete(Path.Combine(projectDir, "public"));
-            Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public", "-p:GHPages=true").ExitCode.Is(0);
+            DeleteDir(Path.Combine(projectDir, "public"));
+            (await Start("dotnet", "publish -c:Release -o:public -p:GHPages=true", projectDir).WaitForExitAsync()).ExitCode.Is(0);
             addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
             // and, the base URL is rewrited to root path.
@@ -120,14 +120,15 @@ namespace PublishSPAforGitHubPages.Build.Test
         }
 
         [Test]
-        public void Publish_DisableComprression_Test()
+        public async Task Publish_DisableComprression_Test()
         {
             using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");
             var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
             var projectDir = Path.Combine(workDir, "WorkDir");
             XcopyDir(projectSrcDir, projectDir);
 
-            Run(projectDir, "dotnet", "publish", "-c:Release", "-o:public", "-p:BlazorEnableCompression=false", "-p:GHPages=true")
+            (await Start("dotnet", "publish -c:Release -o:public -p:BlazorEnableCompression=false -p:GHPages=true", projectDir)
+                .WaitForExitAsync())
                 .ExitCode.Is(0);
 
             var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
