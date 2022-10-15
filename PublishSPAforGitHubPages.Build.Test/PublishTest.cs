@@ -163,4 +163,46 @@ public class PublishTest
         await dotnetCLI.WaitForExitAsync();
         dotnetCLI.ExitCode.Is(0, message: dotnetCLI.Output);
     }
+
+    [Test]
+    public async Task Publish_PWA_For_NonGHPages_Test()
+    {
+        using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");
+        var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
+        var projectDir = Path.Combine(workDir, "WorkDir");
+        XcopyDir(projectSrcDir, projectDir);
+
+        var dotnetCLI = Start("dotnet", "publish -c:Release -o:public -p:GHPagesBase=\"/foo/\"", projectDir);
+        await dotnetCLI.WaitForExitAsync();
+        dotnetCLI.ExitCode.Is(0, message: dotnetCLI.Output);
+
+        var actualIndexHtmlPath = Path.Combine(projectDir, "public", "wwwroot", "index.html");
+        var actualIndexHtmlContents = File.ReadAllLines(actualIndexHtmlPath);
+
+        var expectedIndexHtmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "StaticFiles", "Expected", "index of PWA - no changed.html");
+        var expectedIndexHtmlContents = File.ReadAllLines(expectedIndexHtmlPath);
+
+        actualIndexHtmlContents.Is(expectedIndexHtmlContents);
+    }
+
+    [Test]
+    public async Task Publish_NonPWA_For_NonGHPages_Test()
+    {
+        using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");
+        var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleAppNonPWA");
+        var projectDir = Path.Combine(workDir, "WorkDir");
+        XcopyDir(projectSrcDir, projectDir);
+
+        var dotnetCLI = Start("dotnet", "publish -c:Release -o:public -p:GHPagesBase=\"/foo/\"", projectDir);
+        await dotnetCLI.WaitForExitAsync();
+        dotnetCLI.ExitCode.Is(0, message: dotnetCLI.Output);
+
+        var actualIndexHtmlPath = Path.Combine(projectDir, "public", "wwwroot", "index.html");
+        var actualIndexHtmlContents = File.ReadAllLines(actualIndexHtmlPath);
+
+        var expectedIndexHtmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "StaticFiles", "Expected", "index of NonPWA - no changed.html");
+        var expectedIndexHtmlContents = File.ReadAllLines(expectedIndexHtmlPath);
+
+        actualIndexHtmlContents.Is(expectedIndexHtmlContents);
+    }
 }
