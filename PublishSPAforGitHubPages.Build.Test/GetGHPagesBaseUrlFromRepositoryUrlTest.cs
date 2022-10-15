@@ -1,50 +1,45 @@
-using System.Collections.Generic;
-using System.IO;
+using NUnit.Framework;
 using PublishSPAforGHPages;
 using PublishSPAforGitHubPages.Build.Test.Internals;
-using NUnit.Framework;
 
-namespace PublishSPAforGitHubPages.Build.Test
+namespace PublishSPAforGitHubPages.Build.Test;
+
+public class GetGHPagesBaseUrlFromRepositoryUrlTest
 {
-    public class GetGHPagesBaseUrlFromRepositoryUrlTest
+    public static IEnumerable<object[]> TestPattern = new[] {
+        new object[]{"HTTPS", ""},
+        new object[]{"HTTPS", "WorkDir"},
+        new object[]{"HTTPS.git", ""},
+        new object[]{"HTTPS.git", "WorkDir"},
+        new object[]{"SSH", ""},
+        new object[]{"SSH", "WorkDir"},
+        new object[]{"SSH.git", ""},
+        new object[]{"SSH.git", "WorkDir"},
+    };
+
+    [TestCaseSource(nameof(TestPattern))]
+    public void GetBaseUrl_ProjectSite_Test(string protocol, string subDir)
     {
-        public static IEnumerable<object[]> TestPattern = new[] {
-            new object[]{"HTTPS", ""},
-            new object[]{"HTTPS", "WorkDir"},
-            new object[]{"HTTPS.git", ""},
-            new object[]{"HTTPS.git", "WorkDir"},
-            new object[]{"SSH", ""},
-            new object[]{"SSH", "WorkDir"},
-            new object[]{"SSH.git", ""},
-            new object[]{"SSH.git", "WorkDir"},
+        using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol);
+        var task = new GetGHPagesBaseUrlFromRepositoryUrl
+        {
+            WorkFolder = Path.Combine(workDir, subDir)
         };
 
-        [Test]
-        [TestCaseSource(nameof(TestPattern))]
-        public void GetBaseUrl_ProjectSite_Test(string protocol, string subDir)
+        task.Execute().IsTrue();
+        task.BaseUrl.Is("/fizz.buzz/");
+    }
+
+    [TestCaseSource(nameof(TestPattern))]
+    public void GetBaseUrl_UserSite_Test(string protocol, string subDir)
+    {
+        using var workDir = WorkDir.SetupWorkDir(siteType: "User", protocol);
+        var task = new GetGHPagesBaseUrlFromRepositoryUrl
         {
-            using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol);
-            var task = new GetGHPagesBaseUrlFromRepositoryUrl
-            {
-                WorkFolder = Path.Combine(workDir, subDir)
-            };
+            WorkFolder = Path.Combine(workDir, subDir)
+        };
 
-            task.Execute().IsTrue();
-            task.BaseUrl.Is("/fizz.buzz/");
-        }
-
-        [Test]
-        [TestCaseSource(nameof(TestPattern))]
-        public void GetBaseUrl_UserSite_Test(string protocol, string subDir)
-        {
-            using var workDir = WorkDir.SetupWorkDir(siteType: "User", protocol);
-            var task = new GetGHPagesBaseUrlFromRepositoryUrl
-            {
-                WorkFolder = Path.Combine(workDir, subDir)
-            };
-
-            task.Execute().IsTrue();
-            task.BaseUrl.Is("/");
-        }
+        task.Execute().IsTrue();
+        task.BaseUrl.Is("/");
     }
 }

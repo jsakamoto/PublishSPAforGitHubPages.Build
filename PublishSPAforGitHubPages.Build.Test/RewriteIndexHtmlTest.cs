@@ -1,100 +1,96 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using PublishSPAforGHPages;
 using PublishSPAforGitHubPages.Build.Test.Internals;
 
-namespace PublishSPAforGitHubPages.Build.Test
+namespace PublishSPAforGitHubPages.Build.Test;
+
+public class RewriteIndexHtmlTest
 {
-    public class RewriteIndexHtmlTest
+    public static IEnumerable<object[]> TestPattern = new[] {
+        new object[]{ "index.html" },
+        new object[]{ "index - no autostart.html" },
+        new object[]{ "index - autostart is true.html" },
+    };
+
+    [TestCaseSource(nameof(TestPattern))]
+    public void InjectBrotliLoader_Test(string caseFileName)
     {
-        public static IEnumerable<object[]> TestPattern = new[] {
-            new object[]{ "index.html" },
-            new object[]{ "index - no autostart.html" },
-            new object[]{ "index - autostart is true.html" },
+        // Given
+        using var workDir = WorkDir.SetupWorkDir("StaticFiles");
+        var sourceDir = Path.Combine(workDir, "Source");
+        var rewritedDir = Path.Combine(workDir, "Rewrited");
+        var targetIndexHtmlPath = Path.Combine(sourceDir, "index.html");
+
+        if (caseFileName != "index.html") File.Copy(Path.Combine(sourceDir, caseFileName), targetIndexHtmlPath, overwrite: true);
+        var exceptIndexHtmlFiles = Directory.GetFiles(sourceDir, "index*.html").Where(path => Path.GetFileName(path) != "index.html").ToArray();
+        foreach (var exceptIndexHtmlFile in exceptIndexHtmlFiles) { File.Delete(exceptIndexHtmlFile); }
+
+        // When
+        var task = new RewriteIndexHtml
+        {
+            WebRootPath = sourceDir,
+            FileSearchPatterns = "*.html",
+            InjectBrotliLoader = true,
+            BaseHref = "/foo/bar/",
+            Recursive = true,
         };
 
-        [TestCaseSource(nameof(TestPattern))]
-        public void InjectBrotliLoader_Test(string caseFileName)
+        task.Execute().IsTrue();
+
+        // Then
+        var filesToCheckUp = new[] { "index.html", "fetchdata/index.html", "counter.html" };
+        foreach (var fileToCheckUp in filesToCheckUp)
         {
-            // Given
-            using var workDir = WorkDir.SetupWorkDir("StaticFiles");
-            var sourceDir = Path.Combine(workDir, "Source");
-            var rewritedDir = Path.Combine(workDir, "Rewrited");
-            var targetIndexHtmlPath = Path.Combine(sourceDir, "index.html");
-
-            if (caseFileName != "index.html") File.Copy(Path.Combine(sourceDir, caseFileName), targetIndexHtmlPath, overwrite: true);
-            var exceptIndexHtmlFiles = Directory.GetFiles(sourceDir, "index*.html").Where(path => Path.GetFileName(path) != "index.html").ToArray();
-            foreach (var exceptIndexHtmlFile in exceptIndexHtmlFiles) { File.Delete(exceptIndexHtmlFile); }
-
-            // When
-            var task = new RewriteIndexHtml
-            {
-                WebRootPath = sourceDir,
-                FileSearchPatterns = "*.html",
-                InjectBrotliLoader = true,
-                BaseHref = "/foo/bar/",
-                Recursive = true,
-            };
-
-            task.Execute().IsTrue();
-
-            // Then
-            var filesToCheckUp = new[] { "index.html", "fetchdata/index.html", "counter.html" };
-            foreach (var fileToCheckUp in filesToCheckUp)
-            {
-                var expectedPath = Path.Combine(rewritedDir, fileToCheckUp);
-                var actualPath = Path.Combine(sourceDir, fileToCheckUp);
-                File.ReadAllLines(actualPath).Is(File.ReadAllLines(expectedPath));
-            }
+            var expectedPath = Path.Combine(rewritedDir, fileToCheckUp);
+            var actualPath = Path.Combine(sourceDir, fileToCheckUp);
+            File.ReadAllLines(actualPath).Is(File.ReadAllLines(expectedPath));
         }
+    }
 
-        [Test]
-        public void NotInjectedBrotliLoader_Test()
+    [Test]
+    public void NotInjectedBrotliLoader_Test()
+    {
+        using var workDir = WorkDir.SetupWorkDir("StaticFiles");
+        var sourceDir = Path.Combine(workDir, "Source");
+        var targetIndexHtmlPath = Path.Combine(sourceDir, "index.html");
+
+        var task = new RewriteIndexHtml
         {
-            using var workDir = WorkDir.SetupWorkDir("StaticFiles");
-            var sourceDir = Path.Combine(workDir, "Source");
-            var targetIndexHtmlPath = Path.Combine(sourceDir, "index.html");
+            WebRootPath = sourceDir,
+            FileSearchPatterns = "index.html",
+            InjectBrotliLoader = false,
+            BaseHref = "/",
+            Recursive = true,
+        };
 
-            var task = new RewriteIndexHtml
-            {
-                WebRootPath = sourceDir,
-                FileSearchPatterns = "index.html",
-                InjectBrotliLoader = false,
-                BaseHref = "/",
-                Recursive = true,
-            };
+        var original = File.ReadAllText(targetIndexHtmlPath);
 
-            var original = File.ReadAllText(targetIndexHtmlPath);
+        task.Execute().IsTrue();
 
-            task.Execute().IsTrue();
+        var rewrited = File.ReadAllText(targetIndexHtmlPath);
 
-            var rewrited = File.ReadAllText(targetIndexHtmlPath);
+        rewrited.Is(original);
+    }
 
-            rewrited.Is(original);
-        }
+    [Test]
+    public void NotInjectedBrotliLoader_bue_to_its_not_Blazor_Test()
+    {
+        using var workDir = WorkDir.SetupWorkDir("StaticFiles");
+        var sourceDir = Path.Combine(workDir, "Source");
+        var rewritedDir = Path.Combine(workDir, "Rewrited");
 
-        [Test]
-        public void NotInjectedBrotliLoader_bue_to_its_not_Blazor_Test()
+        var task = new RewriteIndexHtml
         {
-            using var workDir = WorkDir.SetupWorkDir("StaticFiles");
-            var sourceDir = Path.Combine(workDir, "Source");
-            var rewritedDir = Path.Combine(workDir, "Rewrited");
+            WebRootPath = sourceDir,
+            FileSearchPatterns = "*.html",
+            InjectBrotliLoader = true,
+            BaseHref = "/foo/bar/",
+            Recursive = true,
+        };
 
-            var task = new RewriteIndexHtml
-            {
-                WebRootPath = sourceDir,
-                FileSearchPatterns = "*.html",
-                InjectBrotliLoader = true,
-                BaseHref = "/foo/bar/",
-                Recursive = true,
-            };
-
-            task.Execute().IsTrue();
-            var actual = File.ReadAllText(Path.Combine(sourceDir, "index - no blazor.html"));
-            var expected = File.ReadAllText(Path.Combine(rewritedDir, "index - no blazor.html"));
-            actual.Is(expected);
-        }
+        task.Execute().IsTrue();
+        var actual = File.ReadAllText(Path.Combine(sourceDir, "index - no blazor.html"));
+        var expected = File.ReadAllText(Path.Combine(rewritedDir, "index - no blazor.html"));
+        actual.Is(expected);
     }
 }

@@ -1,197 +1,166 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using NUnit.Framework;
 using PublishSPAforGHPages.Models;
 using PublishSPAforGitHubPages.Build.Test.Internals;
-using Toolbelt.Diagnostics;
 using static Toolbelt.Diagnostics.XProcess;
 using static Toolbelt.FileIO;
 
-namespace PublishSPAforGitHubPages.Build.Test
+namespace PublishSPAforGitHubPages.Build.Test;
+
+[Parallelizable(ParallelScope.Children)]
+public class PublishTest
 {
-    [Parallelizable(ParallelScope.Children)]
-    public class PublishTest
+    private readonly HtmlParser _Parser = new();
+
+    public static readonly IEnumerable<object[]> TestPattern = new[] {
+        new object[]{"HTTPS", ""},
+        new object[]{"HTTPS", "WorkDir"},
+        //new object[]{"HTTPS.git", ""},
+        //new object[]{"HTTPS.git", "WorkDir"},
+        //new object[]{"SSH", ""},
+        //new object[]{"SSH", "WorkDir"},
+        //new object[]{"SSH.git", ""},
+        //new object[]{"SSH.git", "WorkDir"},
+    };
+
+    private string GetBaseHref(string indexHtmlPath)
     {
-        private readonly HtmlParser _Parser = new();
+        using var indexHtmlDoc = this._Parser.ParseDocument(File.ReadAllText(indexHtmlPath));
+        var href = indexHtmlDoc.Head?.Children.OfType<IHtmlBaseElement>().FirstOrDefault()?.Href;
+        href.IsNotNull();
+        return href;
+    }
 
-        public static readonly IEnumerable<object[]> TestPattern = new[] {
-            new object[]{"HTTPS", ""},
-            new object[]{"HTTPS", "WorkDir"},
-            //new object[]{"HTTPS.git", ""},
-            //new object[]{"HTTPS.git", "WorkDir"},
-            //new object[]{"SSH", ""},
-            //new object[]{"SSH", "WorkDir"},
-            //new object[]{"SSH.git", ""},
-            //new object[]{"SSH.git", "WorkDir"},
-        };
+    [TestCaseSource(nameof(TestPattern))]
+    public async Task Publish_ProjectSite_Test(string protocol, string subDir)
+    {
+        using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol);
+        var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
+        var projectDir = Path.Combine(workDir, subDir);
+        XcopyDir(projectSrcDir, projectDir);
 
-        private string GetBaseHref(string indexHtmlPath)
-        {
-            using var indexHtmlDoc = this._Parser.ParseDocument(File.ReadAllText(indexHtmlPath));
-            return indexHtmlDoc.Head.Children.OfType<IHtmlBaseElement>().First().Href;
-        }
+        var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
+        var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "decode.min.js", "brotliloader.min.js" }
+            .ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
+        var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
+        var published404HtmlPath = addedFiles["404.html"];
 
-        [Test]
-        [TestCaseSource(nameof(TestPattern))]
-        public async Task Publish_ProjectSite_Test(string protocol, string subDir)
-        {
-            using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol);
-            var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
-            var projectDir = Path.Combine(workDir, subDir);
-            XcopyDir(projectSrcDir, projectDir);
+        // At first, normal publishing doesn't contain any additional files.
+        (await Start("dotnet", "publish -c:Release -o:public", projectDir).WaitForExitAsync()).ExitCode.Is(0);
+        addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
-            var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
-            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "decode.min.js", "brotliloader.min.js" }
-                .ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
-            var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
-            var published404HtmlPath = addedFiles["404.html"];
+        // and, the base URL is not rewrited.
+        this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
 
-            // At first, normal publishing doesn't contain any additional files.
-            (await Start("dotnet", "publish -c:Release -o:public", projectDir).WaitForExitAsync()).ExitCode.Is(0);
-            addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
+        // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
+        DeleteDir(Path.Combine(projectDir, "public"));
+        (await Start("dotnet", "publish -c:Release -o:public -p:GHPages=true", projectDir).WaitForExitAsync()).ExitCode.Is(0);
+        addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
-            // and, the base URL is not rewrited.
-            this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
+        // and, the base URL is rewrited to project sub path.
+        this.GetBaseHref(publishedIndexHtmlPath).Is("/fizz.buzz/");
 
-            // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
-            DeleteDir(Path.Combine(projectDir, "public"));
-            (await Start("dotnet", "publish -c:Release -o:public -p:GHPages=true", projectDir).WaitForExitAsync()).ExitCode.Is(0);
-            addedFiles.Values.All(f => File.Exists(f)).IsTrue();
+        // Validate that the "404.html" is a copy of the "index.html".
+        var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
+        var _404HtmlBytes = File.ReadAllBytes(published404HtmlPath);
+        _404HtmlBytes.Is(indexHtmlBytes);
+    }
 
-            // and, the base URL is rewrited to project sub path.
-            this.GetBaseHref(publishedIndexHtmlPath).Is("/fizz.buzz/");
+    [TestCaseSource(nameof(TestPattern))]
+    public async Task Publish_UserSite_Test(string protocol, string subDir)
+    {
+        using var workDir = WorkDir.SetupWorkDir(siteType: "User", protocol);
+        var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
+        var projectDir = Path.Combine(workDir, subDir);
+        XcopyDir(projectSrcDir, projectDir);
 
-            // Validate that the "404.html" is a copy of the "index.html".
-            var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
-            var _404HtmlBytes = File.ReadAllBytes(published404HtmlPath);
-            _404HtmlBytes.Is(indexHtmlBytes);
+        var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
+        var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "decode.min.js", "brotliloader.min.js" }
+            .ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
+        var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
+        var published404HtmlPath = addedFiles["404.html"];
 
-            // Validate recompression static files.
-            ValidateRecompression(publishedIndexHtmlPath, indexHtmlBytes);
-            ValidateRecompression(published404HtmlPath, _404HtmlBytes);
-        }
+        // At first, normal publishing doesn't contain any additional files.
+        (await Start("dotnet", "publish -c:Release -o:public", projectDir).WaitForExitAsync()).ExitCode.Is(0);
+        addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
 
-        [TestCaseSource(nameof(TestPattern))]
-        public async Task Publish_UserSite_Test(string protocol, string subDir)
-        {
-            using var workDir = WorkDir.SetupWorkDir(siteType: "User", protocol);
-            var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
-            var projectDir = Path.Combine(workDir, subDir);
-            XcopyDir(projectSrcDir, projectDir);
+        // and, the base URL is not rewrited.
+        this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
 
-            var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
-            var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "decode.min.js", "brotliloader.min.js" }
-                .ToDictionary(f => f, f => Path.Combine(publishedFilesDir, f));
-            var publishedIndexHtmlPath = Path.Combine(publishedFilesDir, "index.html");
-            var published404HtmlPath = addedFiles["404.html"];
+        // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
+        DeleteDir(Path.Combine(projectDir, "public"));
+        (await Start("dotnet", "publish -c:Release -o:public -p:GHPages=true", projectDir).WaitForExitAsync()).ExitCode.Is(0);
+        addedFiles.Values.All(f => File.Exists(f)).IsTrue();
 
-            // At first, normal publishing doesn't contain any additional files.
-            (await Start("dotnet", "publish -c:Release -o:public", projectDir).WaitForExitAsync()).ExitCode.Is(0);
-            addedFiles.Values.Any(f => File.Exists(f)).IsFalse();
+        // and, the base URL is rewrited to root path.
+        this.GetBaseHref(publishedIndexHtmlPath).Is("/");
 
-            // and, the base URL is not rewrited.
-            this.GetBaseHref(publishedIndexHtmlPath).Is("/foo/");
+        // Validate that the "404.html" is a copy of the "index.html".
+        var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
+        var _404HtmlBytes = File.ReadAllBytes(Path.Combine(publishedFilesDir, "404.html"));
+        _404HtmlBytes.Is(indexHtmlBytes);
+    }
 
-            // Second, "GHPages" enabled publishing contain additional files for GitHub pages.
-            DeleteDir(Path.Combine(projectDir, "public"));
-            (await Start("dotnet", "publish -c:Release -o:public -p:GHPages=true", projectDir).WaitForExitAsync()).ExitCode.Is(0);
-            addedFiles.Values.All(f => File.Exists(f)).IsTrue();
+    [Test]
+    public async Task Publish_DisableComprression_Test()
+    {
+        using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");
+        var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
+        var projectDir = Path.Combine(workDir, "WorkDir");
+        XcopyDir(projectSrcDir, projectDir);
 
-            // and, the base URL is rewrited to root path.
-            this.GetBaseHref(publishedIndexHtmlPath).Is("/");
+        (await Start("dotnet", "publish -c:Release -o:public -p:BlazorEnableCompression=false -p:GHPages=true", projectDir)
+            .WaitForExitAsync())
+            .ExitCode.Is(0);
 
-            // Validate that the "404.html" is a copy of the "index.html".
-            var indexHtmlBytes = File.ReadAllBytes(publishedIndexHtmlPath);
-            var _404HtmlBytes = File.ReadAllBytes(Path.Combine(publishedFilesDir, "404.html"));
-            _404HtmlBytes.Is(indexHtmlBytes);
+        var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
 
-            // Validate recompression static files.
-            ValidateRecompression(publishedIndexHtmlPath, indexHtmlBytes);
-            ValidateRecompression(published404HtmlPath, _404HtmlBytes);
-        }
+        var actualPublishedFiles = Directory.GetFiles(publishedFilesDir).OrderBy(name => name).ToArray();
 
-        [Test]
-        public async Task Publish_DisableComprression_Test()
-        {
-            using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");
-            var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleApp");
-            var projectDir = Path.Combine(workDir, "WorkDir");
-            XcopyDir(projectSrcDir, projectDir);
+        // compression files are not exists.
+        var expectedPublishedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "index.html", "favicon.ico", "manifest.json", "service-worker.js", "my-assets.js" }
+            .ToDictionary(name => name, name => Path.Combine(publishedFilesDir, name));
+        actualPublishedFiles.Is(expectedPublishedFiles.Values.OrderBy(name => name));
 
-            (await Start("dotnet", "publish -c:Release -o:public -p:BlazorEnableCompression=false -p:GHPages=true", projectDir)
-                .WaitForExitAsync())
-                .ExitCode.Is(0);
+        // Brotli loader was not injected.
+        var expectedIndexHtmlContents = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "StaticFiles", "Rewrited", "index - brotli loader is not injected.html"));
+        var actualIndexHtmlContents = File.ReadAllText(expectedPublishedFiles["index.html"]);
+        actualIndexHtmlContents.Is(expectedIndexHtmlContents);
 
-            var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
+        using var sha256 = SHA256.Create();
+        var expectedIndexHtmlBytes = File.ReadAllBytes(expectedPublishedFiles["index.html"]);
+        var hash = "sha256-" + Convert.ToBase64String(sha256.ComputeHash(expectedIndexHtmlBytes));
 
-            var actualPublishedFiles = Directory.GetFiles(publishedFilesDir).OrderBy(name => name).ToArray();
+        // Verify the file hash in the service worker assets manifest.
+        var serviceWorkerAssetsJs = File.ReadAllText(expectedPublishedFiles["my-assets.js"]);
+        serviceWorkerAssetsJs = Regex.Replace(serviceWorkerAssetsJs, @"^self\.assetsManifest\s*=\s*", "");
+        serviceWorkerAssetsJs = Regex.Replace(serviceWorkerAssetsJs, ";\\s*$", "");
+        var assetsManifestFile = JsonSerializer.Deserialize<AssetsManifestFile>(serviceWorkerAssetsJs);
 
-            // compression files are not exists.
-            var expectedPublishedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "index.html", "favicon.ico", "manifest.json", "service-worker.js", "my-assets.js" }
-                .ToDictionary(name => name, name => Path.Combine(publishedFilesDir, name));
-            actualPublishedFiles.Is(expectedPublishedFiles.Values.OrderBy(name => name));
+        assetsManifestFile.IsNotNull();
+        assetsManifestFile.assets.IsNotNull();
+        var assetManifestEntry = assetsManifestFile.assets.FirstOrDefault(a => a.url == "index.html");
+        assetManifestEntry.IsNotNull();
+        assetManifestEntry.hash.Is(hash);
 
-            // Brotli loader was not injected.
-            var expectedIndexHtmlContents = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "StaticFiles", "Rewrited", "index - brotli loader is not injected.html"));
-            var actualIndexHtmlContents = File.ReadAllText(expectedPublishedFiles["index.html"]);
-            actualIndexHtmlContents.Is(expectedIndexHtmlContents);
+        // Verify the assets manifest doesn't include compressed file path such as ".dll.br" or ".dll.bz".
+        assetsManifestFile.assets.Any(a => a.url.EndsWith(".br") || a.url.EndsWith(".bz")).IsFalse();
+    }
 
-            using var sha256 = SHA256.Create();
-            var expectedIndexHtmlBytes = File.ReadAllBytes(expectedPublishedFiles["index.html"]);
-            var hash = "sha256-" + Convert.ToBase64String(sha256.ComputeHash(expectedIndexHtmlBytes));
+    [Test]
+    public async Task Publish_NonPWA_Test()
+    {
+        using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");
+        var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleAppNonPWA");
+        var projectDir = Path.Combine(workDir, "WorkDir");
+        XcopyDir(projectSrcDir, projectDir);
 
-            // Verify the file hash in the service worker assets manifest.
-            var serviceWorkerAssetsJs = File.ReadAllText(expectedPublishedFiles["my-assets.js"]);
-            serviceWorkerAssetsJs = Regex.Replace(serviceWorkerAssetsJs, @"^self\.assetsManifest\s*=\s*", "");
-            serviceWorkerAssetsJs = Regex.Replace(serviceWorkerAssetsJs, ";\\s*$", "");
-            var assetsManifestFile = JsonSerializer.Deserialize<AssetsManifestFile>(serviceWorkerAssetsJs);
-
-            var assetManifestEntry = assetsManifestFile?.assets?.First(a => a.url == "index.html");
-            assetManifestEntry.IsNotNull();
-            assetManifestEntry.hash.Is(hash);
-
-            // Verify the assets manifest doesn't include compressed file path such as ".dll.br" or ".dll.bz".
-            assetsManifestFile.assets.Any(a => a.url.EndsWith(".br") || a.url.EndsWith(".bz")).IsFalse();
-        }
-
-        [Test]
-        public async Task Publish_NonPWA_Test()
-        {
-            using var workDir = WorkDir.SetupWorkDir(siteType: "Project", protocol: "HTTPS");
-            var projectSrcDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "SampleAppNonPWA");
-            var projectDir = Path.Combine(workDir, "WorkDir");
-            XcopyDir(projectSrcDir, projectDir);
-
-            var dotnetCLI = XProcess.Start("dotnet", "publish -c:Release -o:public -p:BlazorEnableCompression=false -p:GHPages=true", projectDir);
-            await dotnetCLI.WaitForExitAsync();
-            dotnetCLI.ExitCode.Is(0, message: dotnetCLI.Output);
-        }
-
-        private static void ValidateRecompression(string htmlPath, byte[] htmlBytes)
-        {
-            ValidateRecompression(htmlPath, htmlBytes, ".gz", fileStream => new GZipStream(fileStream, CompressionMode.Decompress));
-            ValidateRecompression(htmlPath, htmlBytes, ".br", fileStream => new BrotliStream(fileStream, CompressionMode.Decompress));
-        }
-
-        private static void ValidateRecompression(string htmlPath, byte[] htmlBytes, string suffix, Func<Stream, Stream> getDecompressingStream)
-        {
-            var compressedFilePath = htmlPath + suffix;
-            File.Exists(compressedFilePath).IsTrue();
-            using var memStream = new MemoryStream();
-            using var compressedFileStream = File.OpenRead(compressedFilePath);
-            using var decompressingStream = getDecompressingStream(compressedFileStream);
-            decompressingStream.CopyTo(memStream);
-
-            memStream.ToArray().Is(htmlBytes);
-        }
+        var dotnetCLI = Start("dotnet", "publish -c:Release -o:public -p:BlazorEnableCompression=false -p:GHPages=true", projectDir);
+        await dotnetCLI.WaitForExitAsync();
+        dotnetCLI.ExitCode.Is(0, message: dotnetCLI.Output);
     }
 }
