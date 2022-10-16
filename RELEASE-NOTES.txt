@@ -1,3 +1,6 @@
+v.2.0.2
+- Fix: rewriting index.html partially works unexpectedly even when the GHPages property is not specified.
+
 v.2.0.1
 - Fix: the published package was broken.
 

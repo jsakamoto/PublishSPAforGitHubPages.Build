@@ -63,7 +63,7 @@
   </Target>
 
   <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element, and inject Brotli loader) -->
-  <Target Name="PublishSPAforGHPages_RewriteIndexHtml" AfterTargets="Publish" Condition=" '$(GHPagesBase)' != '' "
+  <Target Name="PublishSPAforGHPages_RewriteIndexHtml" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' AND '$(GHPagesBase)' != '' "
     DependsOnTargets="PublishSPAforGHPages_DefineProperties">
     <PublishSPAforGHPages.RewriteIndexHtml
       Condition="Exists($(GHPagesIndexHtml))"
