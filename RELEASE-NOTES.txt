@@ -1,3 +1,7 @@
+v.2.1.0
+- Fix: The Brotli loader was not injected on .NET 8.
+- Improve: Use the Brotli compression decoder ES6 module edition.
+
 v.2.0.2
 - Fix: rewriting index.html partially works unexpectedly even when the GHPages property is not specified.
 
