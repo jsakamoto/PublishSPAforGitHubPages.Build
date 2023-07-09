@@ -124,7 +124,7 @@ namespace PublishSPAforGHPages
             if (!this.InjectBrotliLoader) return false;
             if (state.InjectedBrotliLoader) return false;
 
-            if (line.TrimStart().StartsWith(@"<script src=""decode.min.js"""))
+            if (line.TrimStart().StartsWith(@"<script src=""brotliloader.min.js"""))
             {
                 state.InjectedBrotliLoader = true;
                 return false;
@@ -134,8 +134,7 @@ namespace PublishSPAforGHPages
             {
                 if (state.DisabledAutoStartOfBlazorWasmLoader)
                 {
-                    rewritedLines.Add(@"    <script src=""decode.min.js""></script>");
-                    rewritedLines.Add(@"    <script src=""brotliloader.min.js""></script>");
+                    rewritedLines.Add(@"    <script src=""brotliloader.min.js"" type=""module""></script>");
                     rewritedLines.Add(line); // line is "</body>"
                     state.InjectedBrotliLoader = true;
                     state.HasChanged = true;
