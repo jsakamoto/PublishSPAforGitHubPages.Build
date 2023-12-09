@@ -1,8 +1,8 @@
 import { BrotliDecode } from './decode.min.js';
 Blazor.start({
-  loadBootResource: function (type, name, defaultUri, integrity) {
-    if (type !== 'dotnetjs' /*&& location.hostname !== 'localhost'*/) {
-      return (async function () {
+  loadBootResource: (type, name, defaultUri, integrity) => {
+    if (type !== 'dotnetjs' && type !== "configuration" /*&& location.hostname !== 'localhost'*/) {
+      return (async () => {
         const response = await fetch(defaultUri + '.br', { cache: 'no-cache' });
         if (!response.ok) {
           throw new Error(response.statusText);
