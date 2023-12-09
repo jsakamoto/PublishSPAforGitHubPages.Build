@@ -1,7 +1,9 @@
-@page "/fetchdata"
+﻿@page "/weather"
 @inject HttpClient Http
 
-<h1>Weather forecast</h1>
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
 
 <p>This component demonstrates fetching data from the server.</p>
 
@@ -35,7 +37,7 @@ else
 }
 
 @code {
-    private WeatherForecast[] forecasts;
+    private WeatherForecast[]? forecasts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -44,11 +46,11 @@ else
 
     public class WeatherForecast
     {
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
 
         public int TemperatureC { get; set; }
 
-        public string Summary { get; set; }
+        public string? Summary { get; set; }
 
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }
