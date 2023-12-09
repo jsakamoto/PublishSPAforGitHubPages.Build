@@ -1,3 +1,6 @@
+v.2.1.1
+- Fix: loading configurations fails on .NET 8.
+
 v.2.1.0
 - Fix: The Brotli loader was not injected on .NET 8.
 - Improve: Use the Brotli compression decoder ES6 module edition.
