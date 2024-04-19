@@ -1,4 +1,6 @@
-# Publish SPA for GitHub Pages - MSBuild Task & Scripts (designed for Blazor WebAssembly) [![NuGet Package](https://img.shields.io/nuget/v/PublishSPAforGitHubPages.Build.svg)](https://www.nuget.org/packages/PublishSPAforGitHubPages.Build/)
+# Publish SPA for GitHub Pages - MSBuild Task & Scripts (designed for Blazor WebAssembly)
+
+[![NuGet Package](https://img.shields.io/nuget/v/PublishSPAforGitHubPages.Build.svg)](https://www.nuget.org/packages/PublishSPAforGitHubPages.Build/) [![Discord](https://img.shields.io/discord/798312431893348414?style=flat&logo=discord&logoColor=white&label=Blazor%20Community&labelColor=5865f2&color=gray)](https://discord.com/channels/798312431893348414/1202165955900473375)
 
 ## Summary
 
@@ -64,7 +66,7 @@ You can also to do it by direct editing the `.csproj` file to add `<PackageRefer
   <ItemGroup>
     ...
     <!-- 👇 Add this node inside any "ItemGroup" node. -->
-    <PackageReference Include="PublishSPAforGitHubPages.Build" Version="1.3.0" />
+    <PackageReference Include="PublishSPAforGitHubPages.Build" Version="2.2.0" />
     ...
 ```
 
@@ -174,11 +176,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout the code
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Install .NET Core SDK
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 6.0.x
 
@@ -188,7 +190,7 @@ jobs:
 
       # Deploy the site
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: publish/wwwroot
