@@ -16,16 +16,16 @@ public class PublishTest
 {
     private readonly HtmlParser _Parser = new();
 
-    public static readonly IEnumerable<object[]> TestPattern = new[] {
-        new object[]{"HTTPS", ""},
-        new object[]{"HTTPS", "WorkDir"},
+    public static readonly IEnumerable<object[]> TestPattern = [
+        ["HTTPS", ""],
+        ["HTTPS", "WorkDir"],
         //new object[]{"HTTPS.git", ""},
         //new object[]{"HTTPS.git", "WorkDir"},
         //new object[]{"SSH", ""},
         //new object[]{"SSH", "WorkDir"},
         //new object[]{"SSH.git", ""},
         //new object[]{"SSH.git", "WorkDir"},
-    };
+    ];
 
     private string GetBaseHref(string indexHtmlPath)
     {

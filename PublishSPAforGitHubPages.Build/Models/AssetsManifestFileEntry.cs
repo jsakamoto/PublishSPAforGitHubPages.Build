@@ -1,9 +1,8 @@
-﻿namespace PublishSPAforGHPages.Models
-{
-    public class AssetsManifestFileEntry
-    {
-        public string url { get; set; }
+﻿namespace PublishSPAforGHPages.Models;
 
-        public string hash { get; set; }
-    }
+public class AssetsManifestFileEntry
+{
+    public string url { get; set; }
+
+    public string hash { get; set; }
 }

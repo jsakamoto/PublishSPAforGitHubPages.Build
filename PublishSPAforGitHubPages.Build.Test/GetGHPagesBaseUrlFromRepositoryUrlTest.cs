@@ -6,16 +6,16 @@ namespace PublishSPAforGitHubPages.Build.Test;
 
 public class GetGHPagesBaseUrlFromRepositoryUrlTest
 {
-    public static IEnumerable<object[]> TestPattern = new[] {
-        new object[]{"HTTPS", ""},
-        new object[]{"HTTPS", "WorkDir"},
-        new object[]{"HTTPS.git", ""},
-        new object[]{"HTTPS.git", "WorkDir"},
-        new object[]{"SSH", ""},
-        new object[]{"SSH", "WorkDir"},
-        new object[]{"SSH.git", ""},
-        new object[]{"SSH.git", "WorkDir"},
-    };
+    public static IEnumerable<object[]> TestPattern = [
+        ["HTTPS", ""],
+        ["HTTPS", "WorkDir"],
+        ["HTTPS.git", ""],
+        ["HTTPS.git", "WorkDir"],
+        ["SSH", ""],
+        ["SSH", "WorkDir"],
+        ["SSH.git", ""],
+        ["SSH.git", "WorkDir"],
+    ];
 
     [TestCaseSource(nameof(TestPattern))]
     public void GetBaseUrl_ProjectSite_Test(string protocol, string subDir)
