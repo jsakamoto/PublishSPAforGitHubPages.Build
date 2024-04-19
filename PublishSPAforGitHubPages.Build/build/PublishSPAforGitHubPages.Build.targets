@@ -39,7 +39,7 @@
       <GHPagesCompressIndexBr>false</GHPagesCompressIndexBr>
       <GHPagesCompressIndexBr Condition="Exists('$(GHPagesIndexHtml).br')">true</GHPagesCompressIndexBr>
       <!-- if "GHPagesInjectBrotliLoader" is true but "*.br" files don't exist, then change "GHPagesInjectBrotliLoader" to false. -->
-      <GHPagesInjectBrotliLoader Condition=" '$(GHPagesInjectBrotliLoader)' == 'true' AND ('$(GHPagesCompressBr)' == 'false' OR '$(BlazorEnableCompression)' == 'false')">false</GHPagesInjectBrotliLoader>
+      <GHPagesInjectBrotliLoader Condition=" '$(GHPagesInjectBrotliLoader)' == 'true' AND ('$(GHPagesCompressBr)' == 'false' OR '$(BlazorEnableCompression)' == 'false' OR '$(CompressionEnabled)' == 'false')">false</GHPagesInjectBrotliLoader>
       <GHPagesRecursive Condition="'$(GHPagesRecursive)'==''">true</GHPagesRecursive>
     </PropertyGroup>
     <PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl Condition=" '$(GHPagesBase)' == '' " WorkFolder="$(ProjectDir)">

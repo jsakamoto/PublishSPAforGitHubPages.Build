@@ -7,13 +7,13 @@
     <LangVersion>Latest</LangVersion>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <Authors>J.Sakamoto</Authors>
-    <Version>2.1.1</Version>
+    <Version>2.2.0-preview.1</Version>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jsakamoto/PublishSPAforGitHubPages.Build</PackageProjectUrl>
     <PackageTags>spa,github,gh-pages,github pages,githubpages</PackageTags>
     <PackageReleaseNotes>(Please write the package release notes in "../RELEASE-NOTES.txt")</PackageReleaseNotes>
     <PackageOutputPath>../_dist</PackageOutputPath>
-    <Copyright>Copyright © 2020-2023 J.Sakamoto, Mozilla Public License 2.0</Copyright>
+    <Copyright>Copyright © 2020-2024 J.Sakamoto, Mozilla Public License 2.0</Copyright>
     <Description>This package provides post published processing to deploy the .NET Core SPA project (such as Blazor WebAssembly) as a GitHub pages site. (rewriting base URL in "index.html", generating ".nojekyll"  ".gitattributes" and "404.html".)</Description>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>

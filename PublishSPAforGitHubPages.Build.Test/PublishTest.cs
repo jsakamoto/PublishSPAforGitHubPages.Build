@@ -113,9 +113,10 @@ public class PublishTest
         var projectDir = Path.Combine(workDir, "WorkDir");
         XcopyDir(projectSrcDir, projectDir);
 
-        (await Start("dotnet", "publish -c:Release -o:public -p:BlazorEnableCompression=false -p:GHPages=true", projectDir)
-            .WaitForExitAsync())
-            .ExitCode.Is(0);
+        //var publishProcess = await Start("dotnet", "publish -c:Release -o:public -p:GHPages=true", projectDir)
+        var publishProcess = await Start("dotnet", "publish -c:Release -o:public -p:CompressionEnabled=false -p:GHPages=true", projectDir)
+            .WaitForExitAsync();
+        publishProcess.ExitCode.Is(0, message: publishProcess.Output);
 
         var publishedFilesDir = Path.Combine(projectDir, "public", "wwwroot");
 
@@ -159,7 +160,7 @@ public class PublishTest
         var projectDir = Path.Combine(workDir, "WorkDir");
         XcopyDir(projectSrcDir, projectDir);
 
-        var dotnetCLI = Start("dotnet", "publish -c:Release -o:public -p:BlazorEnableCompression=false -p:GHPages=true", projectDir);
+        var dotnetCLI = Start("dotnet", "publish -c:Release -o:public -p:CompressionEnabled=false -p:GHPages=true", projectDir);
         await dotnetCLI.WaitForExitAsync();
         dotnetCLI.ExitCode.Is(0, message: dotnetCLI.Output);
     }
