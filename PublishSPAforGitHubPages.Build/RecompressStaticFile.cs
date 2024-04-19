@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.IO.Compression;
-using Brotli;
-//using BrotliSharpLib;
+using BrotliSharpLib;
 using Microsoft.Build.Framework;
 
 namespace PublishSPAforGHPages
@@ -25,7 +24,7 @@ namespace PublishSPAforGHPages
             var targetFiles = Directory.GetFiles(baseDir, fileName, searchOption);
             foreach (var targeFile in targetFiles)
             {
-                Recompress(targeFile);
+                this.Recompress(targeFile);
             }
 
             return true;
@@ -35,7 +34,7 @@ namespace PublishSPAforGHPages
         {
             using var sourceStream = System.IO.File.OpenRead(file);
 
-            if (EnableGzip)
+            if (this.EnableGzip)
             {
                 using var outputStream = System.IO.File.Create(this.File + ".gz");
                 using var compressingStream = new GZipStream(outputStream, CompressionLevel.Optimal);
@@ -43,7 +42,7 @@ namespace PublishSPAforGHPages
                 sourceStream.CopyTo(compressingStream);
             }
 
-            if (EnableBrotli)
+            if (this.EnableBrotli)
             {
                 using var outputStream = System.IO.File.Create(this.File + ".br");
                 using var compressingStream = new BrotliStream(outputStream, CompressionMode.Compress);
