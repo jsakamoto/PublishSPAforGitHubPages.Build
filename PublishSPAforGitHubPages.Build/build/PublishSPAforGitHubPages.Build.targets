@@ -27,13 +27,12 @@
       <GHPagesRewriteHtmlFileSearchPattern Condition=" '$(GHPagesRewriteHtmlFileSearchPattern)' == '' ">*.html</GHPagesRewriteHtmlFileSearchPattern>
       <GHPagesIndexHtml Condition="'$(GHPagesIndexHtml)'==''">$(GHPagesRoot)index.html</GHPagesIndexHtml>
       <GHPages404Html Condition="'$(GHPages404Html)'==''">$(GHPagesRoot)404.html</GHPages404Html>
-      <GHPagesDotnetWasm Condition=" '$(GHPagesDotnetWasm)'=='' AND Exists('$(GHPagesRoot)_framework\dotnet.wasm')">$(GHPagesRoot)_framework\dotnet.wasm</GHPagesDotnetWasm>
-      <GHPagesDotnetWasm Condition=" '$(GHPagesDotnetWasm)'=='' AND Exists('$(GHPagesRoot)_framework\dotnet.native.wasm')">$(GHPagesRoot)_framework\dotnet.native.wasm</GHPagesDotnetWasm>
+      <GHPagesBlazorBootJson>$(GHPagesRoot)_framework\blazor.boot.json</GHPagesBlazorBootJson>
       <GHPagesSvcWorkerAssetsJs Condition=" '$(GHPagesSvcWorkerAssetsJs)'=='' AND '$(ServiceWorkerAssetsManifest)' != '' ">$(GHPagesRoot)$(ServiceWorkerAssetsManifest)</GHPagesSvcWorkerAssetsJs>
       <GHPagesCompressGz>false</GHPagesCompressGz>
-      <GHPagesCompressGz Condition="Exists('$(GHPagesDotnetWasm).gz')">true</GHPagesCompressGz>
+      <GHPagesCompressGz Condition="Exists('$(GHPagesBlazorBootJson).gz')">true</GHPagesCompressGz>
       <GHPagesCompressBr>false</GHPagesCompressBr>
-      <GHPagesCompressBr Condition="Exists('$(GHPagesDotnetWasm).br')">true</GHPagesCompressBr>
+      <GHPagesCompressBr Condition="Exists('$(GHPagesBlazorBootJson).br')">true</GHPagesCompressBr>
       <GHPagesCompressIndexGz>false</GHPagesCompressIndexGz>
       <GHPagesCompressIndexGz Condition="Exists('$(GHPagesIndexHtml).gz')">true</GHPagesCompressIndexGz>
       <GHPagesCompressIndexBr>false</GHPagesCompressIndexBr>
