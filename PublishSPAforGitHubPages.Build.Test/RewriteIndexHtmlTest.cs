@@ -6,11 +6,11 @@ namespace PublishSPAforGitHubPages.Build.Test;
 
 public class RewriteIndexHtmlTest
 {
-    public static IEnumerable<object[]> TestPattern = new[] {
-        new object[]{ "index.html" },
-        new object[]{ "index - no autostart.html" },
-        new object[]{ "index - autostart is true.html" },
-    };
+    public static IEnumerable<object[]> TestPattern = [
+        ["index.html"],
+        ["index - no autostart.html"],
+        ["index - autostart is true.html"],
+    ];
 
     [TestCaseSource(nameof(TestPattern))]
     public void InjectBrotliLoader_Test(string caseFileName)

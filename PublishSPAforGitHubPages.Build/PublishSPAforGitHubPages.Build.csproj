@@ -5,6 +5,7 @@
     <RootNamespace>PublishSPAforGHPages</RootNamespace>
     <IsTool>true</IsTool>
     <LangVersion>Latest</LangVersion>
+    <ImplicitUsings>true</ImplicitUsings>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <Authors>J.Sakamoto</Authors>
     <Version>2.2.0-preview.1</Version>
@@ -23,7 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.9.20" PrivateAssets="All" />
-    <PackageReference Include="Brotli.NET" Version="2.1.1" />
+    <PackageReference Include="BrotliSharpLib" Version="0.3.3" />
     <PackageReference Include="BuildBundlerMinifier" Version="3.2.449">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
@@ -58,12 +59,8 @@
 
   <Target Name="BundleAssemblies" BeforeTargets="GenerateNuspec" AfterTargets="Build">
     <ItemGroup>
-      <None Include="$(TargetDir)Brotli.Core.dll">
+      <None Include="$(TargetDir)BrotliSharpLib.dll">
         <PackagePath>tools\</PackagePath>
-        <Pack>true</Pack>
-      </None>
-      <None Include="$(TargetDir)runtimes/**/*">
-        <PackagePath>tools\runtimes\</PackagePath>
         <Pack>true</Pack>
       </None>
     </ItemGroup>

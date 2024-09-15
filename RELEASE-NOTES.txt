@@ -1,3 +1,6 @@
+v.2.2.0
+- Fix: it failed on Linux with .NET 9 Preview 3 SDK.
+
 v.2.1.1
 - Fix: loading configurations fails on .NET 8.
 
