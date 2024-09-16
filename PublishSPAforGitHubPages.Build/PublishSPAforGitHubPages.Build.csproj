@@ -57,7 +57,7 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="BundleAssemblies" BeforeTargets="GenerateNuspec" AfterTargets="Build">
+  <Target Name="BundleAssemblies" BeforeTargets="GenerateNuspec;_GetPackageFiles" AfterTargets="Build">
     <ItemGroup>
       <None Include="$(TargetDir)BrotliSharpLib.dll">
         <PackagePath>tools\</PackagePath>
