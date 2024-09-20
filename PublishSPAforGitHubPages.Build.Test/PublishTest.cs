@@ -4,8 +4,8 @@ using System.Text.RegularExpressions;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using NUnit.Framework;
-using PublishSPAforGHPages.Models;
 using PublishSPAforGitHubPages.Build.Test.Internals;
+using PublishSPAforGitHubPages.Build.Test.Internals.Models;
 using static Toolbelt.Diagnostics.XProcess;
 using static Toolbelt.FileIO;
 
@@ -148,7 +148,7 @@ public class PublishTest
         assetManifestEntry.hash.Is(hash);
 
         // Verify the assets manifest doesn't include compressed file path such as ".dll.br" or ".dll.bz".
-        assetsManifestFile.assets.Any(a => a.url.EndsWith(".br") || a.url.EndsWith(".bz")).IsFalse();
+        assetsManifestFile.assets.Any(a => a.url?.EndsWith(".br") == true || a.url?.EndsWith(".bz") == true).IsFalse();
     }
 
     [Test]
