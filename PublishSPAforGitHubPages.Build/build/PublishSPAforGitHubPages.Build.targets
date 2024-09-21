@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <GHPagesEnable>$(GHPages)</GHPagesEnable>
+    <GHPagesEnable Condition=" '$(GHPagesEnable)' == '' ">false</GHPagesEnable>
     <!--
       In .NET 6 SDK that wasm-tools workload is installed, "dotnet publish" causes calling "Publish" target twice.
       - https://github.com/dotnet/runtime/blob/v6.0.0-rc.2.21480.5/src/mono/wasm/build/README.md
@@ -22,7 +23,8 @@
       <GHPagesRoot Condition=" '$(GHPagesRoot)' == '' ">$([System.IO.Path]::GetFullPath($(PublishDir)wwwroot))\</GHPagesRoot>
       <GHPagesRewriteHtmlFileSearchPattern Condition=" '$(GHPagesRewriteHtmlFileSearchPattern)' == '' ">*.html</GHPagesRewriteHtmlFileSearchPattern>
       <GHPagesRecursive Condition=" '$(GHPagesRecursive)' == '' ">true</GHPagesRecursive>
-      
+      <GHPagesInjectBrotliLoader Condition=" '$(GHPagesInjectBrotliLoader)' == '' " >$(GHPagesEnable)</GHPagesInjectBrotliLoader>
+
       <GHPagesIndexHtml Condition=" '$(GHPagesIndexHtml)' == '' ">$(GHPagesRoot)index.html</GHPagesIndexHtml>
       <GHPages404Html Condition=" '$(GHPages404Html)' == '' ">$(GHPagesRoot)404.html</GHPages404Html>
       <GHPagesSvcWorkerAssetsJs Condition=" '$(GHPagesSvcWorkerAssetsJs)'=='' AND '$(ServiceWorkerAssetsManifest)' != '' ">$(GHPagesRoot)$(ServiceWorkerAssetsManifest)</GHPagesSvcWorkerAssetsJs>
@@ -33,15 +35,15 @@
     </PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl>
 
     <PropertyGroup>
-      <BroltiLoaderWebRootPath Condition=" '$(BroltiLoaderWebRootPath)' == '' ">$(GHPagesRoot)</BroltiLoaderWebRootPath>
-      <BroltiLoaderRewriteHtmlFileSearchPattern Condition=" '$(BroltiLoaderRewriteHtmlFileSearchPattern)' == '' ">$(GHPagesRewriteHtmlFileSearchPattern)</BroltiLoaderRewriteHtmlFileSearchPattern>
-      <BroltiLoaderRecursive Condition=" '$(BroltiLoaderRecursive)' == '' ">$(GHPagesRecursive)</BroltiLoaderRecursive>
+      <BrotliLoaderWebRootPath Condition=" '$(BrotliLoaderWebRootPath)' == '' ">$(GHPagesRoot)</BrotliLoaderWebRootPath>
+      <BrotliLoaderRewriteHtmlFileSearchPattern Condition=" '$(BrotliLoaderRewriteHtmlFileSearchPattern)' == '' ">$(GHPagesRewriteHtmlFileSearchPattern)</BrotliLoaderRewriteHtmlFileSearchPattern>
+      <BrotliLoaderRecursive Condition=" '$(BrotliLoaderRecursive)' == '' ">$(GHPagesRecursive)</BrotliLoaderRecursive>
 
-      <BroltiLoaderInjectLoader Condition=" '$(BroltiLoaderInjectLoader)' != '' ">$(GHPagesInjectBrotliLoader)</BroltiLoaderInjectLoader>
-      <BroltiLoaderRewriteBaseHref Condition=" '$(BroltiLoaderRewriteBaseHref)' == '' AND '$(GHPagesEnable)' == 'true' ">true</BroltiLoaderRewriteBaseHref>
-      <BroltiLoaderBaseHref Condition=" '$(BroltiLoaderBaseHref)' == '' ">$(GHPagesBase)</BroltiLoaderBaseHref>
+      <BrotliLoaderInjectLoader Condition=" '$(BrotliLoaderInjectLoader)' == '' ">$(GHPagesInjectBrotliLoader)</BrotliLoaderInjectLoader>
+      <BrotliLoaderRewriteBaseHref Condition=" '$(BrotliLoaderRewriteBaseHref)' == '' AND '$(GHPagesEnable)' == 'true' ">true</BrotliLoaderRewriteBaseHref>
+      <BrotliLoaderBaseHref Condition=" '$(BrotliLoaderBaseHref)' == '' ">$(GHPagesBase)</BrotliLoaderBaseHref>
 
-      <BroltiLoaderSvcWorkerAssetsJs Condition=" '$(BroltiLoaderSvcWorkerAssetsJs)' == '' ">$(GHPagesSvcWorkerAssetsJs)</BroltiLoaderSvcWorkerAssetsJs>
+      <BrotliLoaderSvcWorkerAssetsJs Condition=" '$(BrotliLoaderSvcWorkerAssetsJs)' == '' ">$(GHPagesSvcWorkerAssetsJs)</BrotliLoaderSvcWorkerAssetsJs>
     </PropertyGroup>
 
   </Target>
@@ -56,7 +58,7 @@
 
     <!-- Copy index.html to 404.html -->
     <Copy SourceFiles="$(GHPagesIndexHtml)" DestinationFiles="$(GHPages404Html)" SkipUnchangedFiles="true" Condition="Exists($(GHPagesIndexHtml))" />
-  
+
     <!-- Compress 404.html -->
     <WriteLinesToFile File="$(GHPages404Html).gz" Lines="" Overwrite="false" Condition="Exists('$(GHPagesIndexHtml).gz')" />
     <WriteLinesToFile File="$(GHPages404Html).br" Lines="" Overwrite="false" Condition="Exists('$(GHPagesIndexHtml).br')" />
