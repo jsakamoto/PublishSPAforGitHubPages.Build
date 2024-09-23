@@ -29,10 +29,10 @@ public class PublishTest
     }
 
     [TestCaseSource(nameof(TestPattern))]
-    public async Task Publish_ProjectSite_Test(OriginUrlType originUrlType, string subDir)
+    public async Task Publish_PWA_ProjectSite_Test(OriginUrlType originUrlType, string subDir)
     {
         // Given
-        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, originUrlType, projectName: "SampleApp", projectLocation: subDir);
+        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, originUrlType, projectName: "SamplePWA", projectLocation: subDir);
         var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "decode.min.js", "brotliloader.min.js" }
             .ToDictionary(f => f, f => Path.Combine(workDir.PublishDir, f));
         var publishedIndexHtmlPath = Path.Combine(workDir.PublishDir, "index.html");
@@ -65,10 +65,10 @@ public class PublishTest
     }
 
     [TestCaseSource(nameof(TestPattern))]
-    public async Task Publish_UserSite_Test(OriginUrlType originUrlType, string subDir)
+    public async Task Publish_PWA_UserSite_Test(OriginUrlType originUrlType, string subDir)
     {
         // Given
-        using var workDir = WorkDir.SetupWorkDir(SiteType.UserSite, originUrlType, projectName: "SampleApp", projectLocation: subDir);
+        using var workDir = WorkDir.SetupWorkDir(SiteType.UserSite, originUrlType, projectName: "SamplePWA", projectLocation: subDir);
         var addedFiles = new[] { ".nojekyll", "404.html", ".gitattributes", "decode.min.js", "brotliloader.min.js" }
             .ToDictionary(f => f, f => Path.Combine(workDir.PublishDir, f));
         var publishedIndexHtmlPath = Path.Combine(workDir.PublishDir, "index.html");
@@ -101,10 +101,10 @@ public class PublishTest
     }
 
     [Test]
-    public async Task Publish_DisableComprression_Test()
+    public async Task Publish_PWA_DisableComprression_Test()
     {
         // Given
-        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, OriginUrlType.HTTPS, projectName: "SampleApp", projectLocation: "WorkDir");
+        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, OriginUrlType.HTTPS, projectName: "SamplePWA", projectLocation: "WorkDir");
 
         // When
         await TestAssert.RunAsync("dotnet", "publish -c:Release -o:public -p:CompressionEnabled=false -p:GHPages=true", workDir.ProjectDir);
@@ -145,7 +145,7 @@ public class PublishTest
     public async Task Publish_NonPWA_Test()
     {
         // Given
-        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, OriginUrlType.HTTPS, projectName: "SampleAppNonPWA", projectLocation: "WorkDir");
+        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, OriginUrlType.HTTPS, projectName: "SampleApp", projectLocation: "WorkDir");
 
         // When & Then
         await TestAssert.RunAsync("dotnet", "publish -c:Release -o:public -p:CompressionEnabled=false -p:GHPages=true", workDir.ProjectDir);
@@ -155,7 +155,7 @@ public class PublishTest
     public async Task Publish_PWA_For_NonGHPages_Test()
     {
         // Given
-        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, OriginUrlType.HTTPS, projectName: "SampleApp", projectLocation: "WorkDir");
+        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, OriginUrlType.HTTPS, projectName: "SamplePWA", projectLocation: "WorkDir");
 
         // When
         await TestAssert.RunAsync("dotnet", "publish -c:Release -o:public -p:GHPagesBase=\"/foo/\"", workDir.ProjectDir);
@@ -170,7 +170,7 @@ public class PublishTest
     public async Task Publish_NonPWA_For_NonGHPages_Test()
     {
         // Given
-        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, OriginUrlType.HTTPS, projectName: "SampleAppNonPWA", projectLocation: "WorkDir");
+        using var workDir = WorkDir.SetupWorkDir(SiteType.ProjectSite, OriginUrlType.HTTPS, projectName: "SampleApp", projectLocation: "WorkDir");
 
         // When
         await TestAssert.RunAsync("dotnet", "publish -c:Release -o:public -p:GHPagesBase=\"/foo/\"", workDir.ProjectDir);
