@@ -8,7 +8,7 @@
     <ImplicitUsings>true</ImplicitUsings>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <Authors>J.Sakamoto</Authors>
-    <Version>3.0.0-preview.1</Version>
+    <Version>3.0.0</Version>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jsakamoto/PublishSPAforGitHubPages.Build</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.9.20" PrivateAssets="All" />
-    <PackageReference Include="BlazorWasmBrotliLoader.Build" Version="1.0.0-preview.1" PrivateAssets="None" />
+    <PackageReference Include="BlazorWasmBrotliLoader.Build" Version="1.0.0" PrivateAssets="None" />
   </ItemGroup>
 
   <ItemGroup>
