@@ -66,7 +66,7 @@ You can also to do it by direct editing the `.csproj` file to add `<PackageRefer
   <ItemGroup>
     ...
     <!-- 👇 Add this node inside any "ItemGroup" node. -->
-    <PackageReference Include="PublishSPAforGitHubPages.Build" Version="2.2.0" />
+    <PackageReference Include="PublishSPAforGitHubPages.Build" Version="3.0.0" />
     ...
 ```
 
@@ -178,11 +178,13 @@ jobs:
       # Checkout the code
       - uses: actions/checkout@v4
 
-      # Install .NET Core SDK
-      - name: Setup .NET Core
+      # Install .NET SDK
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
+      - name: Install .NET WebAssembly Tools
+        run: dotnet workload install wasm-tools
 
       # Publish the site
       - name: Publish

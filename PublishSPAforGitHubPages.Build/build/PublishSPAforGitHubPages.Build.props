@@ -1,0 +1,5 @@
+﻿<Project>
+  <PropertyGroup>
+    <BeforeBlazorWasmBrotliLoader>$(BeforeBlazorWasmBrotliLoader);PublishSPAforGHPages_DefineProperties</BeforeBlazorWasmBrotliLoader>
+  </PropertyGroup>
+</Project>
