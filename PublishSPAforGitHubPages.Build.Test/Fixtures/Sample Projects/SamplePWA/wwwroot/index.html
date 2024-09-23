@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SampleApp</title>
     <base href="/foo/" />
+    <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="css/blazor-ui.css" />
 </head>
 
@@ -22,6 +23,7 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
 </body>
 
 </html>
