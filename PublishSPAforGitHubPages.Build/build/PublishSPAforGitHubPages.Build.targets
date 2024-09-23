@@ -1,96 +1,72 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <UsingTask TaskName="PublishSPAforGHPages.RewriteIndexHtml" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
-  <UsingTask TaskName="PublishSPAforGHPages.RewriteServiceWorkerAssetsManifestJs" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
-  <UsingTask TaskName="PublishSPAforGHPages.RecompressStaticFile" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
   <UsingTask TaskName="PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl" AssemblyFile="$(MSBuildThisFileDirectory)../tools/PublishSPAforGitHubPages.Build.dll" />
 
   <PropertyGroup>
-    <BeforePublishSPAforGHPages>$(BeforePublishSPAforGHPages)</BeforePublishSPAforGHPages>
-    <GHPagesInjectBrotliLoader Condition=" '$(GHPagesInjectBrotliLoader)' == '' ">true</GHPagesInjectBrotliLoader>
     <GHPagesEnable>$(GHPages)</GHPagesEnable>
+    <GHPagesEnable Condition=" '$(GHPagesEnable)' == '' ">false</GHPagesEnable>
     <!--
-    In .NET 6 SDK that wasm-tools workload is installed, "dotnet publish" causes calling "Publish" target twice.
-    - https://github.com/dotnet/runtime/blob/v6.0.0-rc.2.21480.5/src/mono/wasm/build/README.md
-    - https://github.com/dotnet/runtime/issues/60412
+      In .NET 6 SDK that wasm-tools workload is installed, "dotnet publish" causes calling "Publish" target twice.
+      - https://github.com/dotnet/runtime/blob/v6.0.0-rc.2.21480.5/src/mono/wasm/build/README.md
+      - https://github.com/dotnet/runtime/issues/60412
     
-    To determine whether it is during the final "Publish" or not, it has to reference "WasmBuildingForNestedPublish" property is true or not.
-    - https://github.com/dotnet/runtime/blob/v6.0.0-rc.2.21480.5/src/mono/wasm/build/WasmApp.targets#L109
-    -->
+      To determine whether it is during the final "Publish" or not, it has to reference "WasmBuildingForNestedPublish" property is true or not.
+      - https://github.com/dotnet/runtime/blob/v6.0.0-rc.2.21480.5/src/mono/wasm/build/WasmApp.targets#L109
+      -->
     <GHPagesEnable Condition=" '$(WasmBuildingForNestedPublish)' == 'true' ">false</GHPagesEnable>
   </PropertyGroup>
 
   <!-- Define Properties -->
   <Target Name="PublishSPAforGHPages_DefineProperties" DependsOnTargets="$(BeforePublishSPAforGHPages)">
+
     <PropertyGroup>
-      <GHPagesRoot Condition="'$(GHPagesRoot)'==''">$([System.IO.Path]::GetFullPath($(PublishDir)wwwroot))\</GHPagesRoot>
+      <GHPagesRoot Condition=" '$(GHPagesRoot)' == '' ">$([System.IO.Path]::GetFullPath($(PublishDir)wwwroot))\</GHPagesRoot>
       <GHPagesRewriteHtmlFileSearchPattern Condition=" '$(GHPagesRewriteHtmlFileSearchPattern)' == '' ">*.html</GHPagesRewriteHtmlFileSearchPattern>
-      <GHPagesIndexHtml Condition="'$(GHPagesIndexHtml)'==''">$(GHPagesRoot)index.html</GHPagesIndexHtml>
-      <GHPages404Html Condition="'$(GHPages404Html)'==''">$(GHPagesRoot)404.html</GHPages404Html>
-      <GHPagesBlazorBootJson>$(GHPagesRoot)_framework\blazor.boot.json</GHPagesBlazorBootJson>
+      <GHPagesRecursive Condition=" '$(GHPagesRecursive)' == '' ">true</GHPagesRecursive>
+      <GHPagesInjectBrotliLoader Condition=" '$(GHPagesInjectBrotliLoader)' == '' " >$(GHPagesEnable)</GHPagesInjectBrotliLoader>
+
+      <GHPagesIndexHtml Condition=" '$(GHPagesIndexHtml)' == '' ">$(GHPagesRoot)index.html</GHPagesIndexHtml>
+      <GHPages404Html Condition=" '$(GHPages404Html)' == '' ">$(GHPagesRoot)404.html</GHPages404Html>
       <GHPagesSvcWorkerAssetsJs Condition=" '$(GHPagesSvcWorkerAssetsJs)'=='' AND '$(ServiceWorkerAssetsManifest)' != '' ">$(GHPagesRoot)$(ServiceWorkerAssetsManifest)</GHPagesSvcWorkerAssetsJs>
-      <GHPagesCompressGz>false</GHPagesCompressGz>
-      <GHPagesCompressGz Condition="Exists('$(GHPagesBlazorBootJson).gz')">true</GHPagesCompressGz>
-      <GHPagesCompressBr>false</GHPagesCompressBr>
-      <GHPagesCompressBr Condition="Exists('$(GHPagesBlazorBootJson).br')">true</GHPagesCompressBr>
-      <GHPagesCompressIndexGz>false</GHPagesCompressIndexGz>
-      <GHPagesCompressIndexGz Condition="Exists('$(GHPagesIndexHtml).gz')">true</GHPagesCompressIndexGz>
-      <GHPagesCompressIndexBr>false</GHPagesCompressIndexBr>
-      <GHPagesCompressIndexBr Condition="Exists('$(GHPagesIndexHtml).br')">true</GHPagesCompressIndexBr>
-      <!-- if "GHPagesInjectBrotliLoader" is true but "*.br" files don't exist, then change "GHPagesInjectBrotliLoader" to false. -->
-      <GHPagesInjectBrotliLoader Condition=" '$(GHPagesInjectBrotliLoader)' == 'true' AND ('$(GHPagesCompressBr)' == 'false' OR '$(BlazorEnableCompression)' == 'false')">false</GHPagesInjectBrotliLoader>
-      <GHPagesRecursive Condition="'$(GHPagesRecursive)'==''">true</GHPagesRecursive>
     </PropertyGroup>
-    <PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl Condition=" '$(GHPagesBase)' == '' " WorkFolder="$(ProjectDir)">
+
+    <PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl Condition=" '$(GHPagesBase)' == '' AND '$(GHPagesEnable)' == 'true' " WorkFolder="$(ProjectDir)">
       <Output TaskParameter="BaseUrl" PropertyName="GHPagesBase" />
     </PublishSPAforGHPages.GetGHPagesBaseUrlFromRepositoryUrl>
+
+    <PropertyGroup>
+      <BrotliLoaderWebRootPath Condition=" '$(BrotliLoaderWebRootPath)' == '' ">$(GHPagesRoot)</BrotliLoaderWebRootPath>
+      <BrotliLoaderRewriteHtmlFileSearchPattern Condition=" '$(BrotliLoaderRewriteHtmlFileSearchPattern)' == '' ">$(GHPagesRewriteHtmlFileSearchPattern)</BrotliLoaderRewriteHtmlFileSearchPattern>
+      <BrotliLoaderRecursive Condition=" '$(BrotliLoaderRecursive)' == '' ">$(GHPagesRecursive)</BrotliLoaderRecursive>
+
+      <BrotliLoaderInjectLoader Condition=" '$(BrotliLoaderInjectLoader)' == '' ">$(GHPagesInjectBrotliLoader)</BrotliLoaderInjectLoader>
+      <BrotliLoaderRewriteBaseHref Condition=" '$(BrotliLoaderRewriteBaseHref)' == '' AND '$(GHPagesEnable)' == 'true' ">true</BrotliLoaderRewriteBaseHref>
+      <BrotliLoaderBaseHref Condition=" '$(BrotliLoaderBaseHref)' == '' ">$(GHPagesBase)</BrotliLoaderBaseHref>
+
+      <BrotliLoaderSvcWorkerAssetsJs Condition=" '$(BrotliLoaderSvcWorkerAssetsJs)' == '' ">$(GHPagesSvcWorkerAssetsJs)</BrotliLoaderSvcWorkerAssetsJs>
+    </PropertyGroup>
+
   </Target>
 
-  <!-- Generate ".nojekyll" file -->
-  <Target Name="PublishSPAforGHPages_GenerateNoJekyll" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
+  <Target Name="PublishSPAforGHPages" AfterTargets="Publish" DependsOnTargets="BlazorWasmBrotliLoader_Inject" Condition=" '$(GHPagesEnable)' == 'true' ">
+
+    <!-- Generate ".nojekyll" file -->
     <WriteLinesToFile File="$(GHPagesRoot).nojekyll" Overwrite="false" />
-  </Target>
 
-  <!-- Generate ".gitattributes" file -->
-  <Target Name="PublishSPAforGHPages_GenerateGitAttributes" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <WriteLinesToFile File="$(GHPagesRoot).gitattributes" Lines="* -text" Overwrite="true" Condition="!Exists('$(GHPagesRoot).gitattributes')" />
-  </Target>
+    <!-- Generate ".gitattributes" file -->
+    <WriteLinesToFile File="$(GHPagesRoot).gitattributes" Lines="* -text" Overwrite="false" />
 
-  <!-- Copy brotrli loader script files -->
-  <Target Name="PublishSPAforGHPages_CopyBrotliLoader" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' AND '$(GHPagesInjectBrotliLoader)' == 'true' " DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)../bundle/scripts/decode.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)decode.min.js')" />
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)../bundle/scripts/brotliloader.min.js" DestinationFolder="$(GHPagesRoot)" Condition="!Exists('$(GHPagesRoot)brotliloader.min.js')" />
-  </Target>
+    <!-- Copy index.html to 404.html -->
+    <Copy SourceFiles="$(GHPagesIndexHtml)" DestinationFiles="$(GHPages404Html)" SkipUnchangedFiles="true" Condition="Exists($(GHPagesIndexHtml))" />
 
-  <!-- Rewrite the index.html (base URL in the "<base href='~'/>" element, and inject Brotli loader) -->
-  <Target Name="PublishSPAforGHPages_RewriteIndexHtml" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' AND '$(GHPagesBase)' != '' "
-    DependsOnTargets="PublishSPAforGHPages_DefineProperties">
-    <PublishSPAforGHPages.RewriteIndexHtml
-      Condition="Exists($(GHPagesIndexHtml))"
-      WebRootPath="$(GHPagesRoot)"
-      FileSearchPatterns="$(GHPagesRewriteHtmlFileSearchPattern)"
-      InjectBrotliLoader="$(GHPagesInjectBrotliLoader)"
-      BaseHref="$(GHPagesBase)"
-      Recursive="$(GHPagesRecursive)" />
+    <!-- Compress 404.html -->
+    <WriteLinesToFile File="$(GHPages404Html).gz" Lines="" Overwrite="false" Condition="Exists('$(GHPagesIndexHtml).gz')" />
+    <WriteLinesToFile File="$(GHPages404Html).br" Lines="" Overwrite="false" Condition="Exists('$(GHPagesIndexHtml).br')" />
+    <ItemGroup>
+      <_GHPages404HtmlItem Include="$(GHPages404Html)" />
+    </ItemGroup>
+    <BlazorWasmBrotliLoader.RecompressStaticFiles Files="@(_GHPages404HtmlItem)" />
 
-    <PublishSPAforGHPages.RewriteServiceWorkerAssetsManifestJs
-      Condition=" '$(GHPagesSvcWorkerAssetsJs)' != '' AND Exists($(GHPagesIndexHtml)) AND Exists($(GHPagesSvcWorkerAssetsJs))"
-      WebRootPath="$(GHPagesRoot)"
-      ServiceWorkerAssetsManifestJs="$(GHPagesSvcWorkerAssetsJs)"
-      InjectBrotliLoader="$(GHPagesInjectBrotliLoader)" />
-  </Target>
-
-  <!-- Copy index.html to 404.html -->
-  <Target Name="PublishSPAforGHPages_Generate404html" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' "
-    DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteIndexHtml">
-    <Copy SourceFiles="$(GHPagesIndexHtml)" DestinationFiles="$(GHPages404Html)" Condition="Exists($(GHPagesIndexHtml))" />
-  </Target>
-
-  <!-- Recompress static files -->
-  <Target Name="PublishSPAforGHPages_RecompressStaticFiles" AfterTargets="Publish" Condition=" '$(GHPagesEnable)' == 'true' "
-    DependsOnTargets="PublishSPAforGHPages_DefineProperties;PublishSPAforGHPages_RewriteIndexHtml;PublishSPAforGHPages_Generate404html">
-    <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPagesIndexHtml))" File="$(GHPagesIndexHtml)" EnableGzip="$(GHPagesCompressIndexGz)" EnableBrotli="$(GHPagesCompressIndexBr)" Recursive="$(GHPagesRecursive)" />
-    <PublishSPAforGHPages.RecompressStaticFile Condition="Exists($(GHPages404Html))" File="$(GHPages404Html)" EnableGzip="$(GHPagesCompressIndexGz)" EnableBrotli="$(GHPagesCompressIndexBr)" Recursive="$(GHPagesRecursive)" />
   </Target>
 
 </Project>

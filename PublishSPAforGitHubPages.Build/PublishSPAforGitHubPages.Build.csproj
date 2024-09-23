@@ -8,15 +8,16 @@
     <ImplicitUsings>true</ImplicitUsings>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <Authors>J.Sakamoto</Authors>
-    <Version>2.2.1</Version>
+    <Version>3.0.0-preview.1</Version>
     <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jsakamoto/PublishSPAforGitHubPages.Build</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
     <PackageTags>spa,github,gh-pages,github pages,githubpages</PackageTags>
     <PackageReleaseNotes>(Please write the package release notes in "../RELEASE-NOTES.txt")</PackageReleaseNotes>
     <PackageOutputPath>../_dist</PackageOutputPath>
     <Copyright>Copyright © 2020-2024 J.Sakamoto, Mozilla Public License 2.0</Copyright>
     <Description>This package provides post published processing to deploy the .NET Core SPA project (such as Blazor WebAssembly) as a GitHub pages site. (rewriting base URL in "index.html", generating ".nojekyll"  ".gitattributes" and "404.html".)</Description>
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <PackageIcon>nupkg-icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -24,10 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.9.20" PrivateAssets="All" />
-    <PackageReference Include="BrotliSharpLib" Version="0.3.3" />
-    <PackageReference Include="BuildBundlerMinifier" Version="3.2.449">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="BlazorWasmBrotliLoader.Build" Version="1.0.0-preview.1" PrivateAssets="None" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,10 +38,6 @@
       <Pack>true</Pack>
       <PackagePath>build</PackagePath>
     </None>
-    <None Include="bundle/**/*">
-      <Pack>true</Pack>
-      <PackagePath>bundle</PackagePath>
-    </None>
   </ItemGroup>
 
   <Target Name="BuildPackageReleaseNotes" BeforeTargets="GenerateNuspec">
@@ -53,17 +47,8 @@
     <PropertyGroup>
       <PackageReleaseNotes>@(ReleaseNoteLines, '%0a')</PackageReleaseNotes>
       <PackageReleaseNotes>$([System.Text.RegularExpressions.Regex]::Match($(PackageReleaseNotes), "^(v\.[\d\.]+.+?)v\.[\d\.]+", System.Text.RegularExpressions.RegexOptions.Singleline).Groups[1].Value)</PackageReleaseNotes>
-      <PackageReleaseNotes>$(PackageReleaseNotes)%0a%0aTo see all the change logs, please visit the following URL.%0a- https://github.com/jsakamoto/PublishSPAforGitHubPages.Build/blob/master/RELEASE-NOTES.txt</PackageReleaseNotes>
+      <PackageReleaseNotes>$(PackageReleaseNotes)%0aTo see all the change logs, please visit the following URL.%0a- https://github.com/jsakamoto/PublishSPAforGitHubPages.Build/blob/master/RELEASE-NOTES.txt</PackageReleaseNotes>
     </PropertyGroup>
-  </Target>
-
-  <Target Name="BundleAssemblies" BeforeTargets="GenerateNuspec;_GetPackageFiles" AfterTargets="Build">
-    <ItemGroup>
-      <None Include="$(TargetDir)BrotliSharpLib.dll">
-        <PackagePath>tools\</PackagePath>
-        <Pack>true</Pack>
-      </None>
-    </ItemGroup>
   </Target>
 
 </Project>
