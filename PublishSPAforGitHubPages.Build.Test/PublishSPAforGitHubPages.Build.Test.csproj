@@ -22,12 +22,12 @@
   <ItemGroup>
     <ProjectReference Include="..\PublishSPAforGitHubPages.Build\PublishSPAforGitHubPages.Build.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Remove="Fixtures/**/*" />
     <Compile Remove="Fixtures/**/*" />
-    <Content Include="Fixtures/**/*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Remove="Fixtures/**/*" />
+    <None Remove="Fixtures/**/*" />
+    <None Include="Fixtures/**/*" />
   </ItemGroup>
 
 </Project>
