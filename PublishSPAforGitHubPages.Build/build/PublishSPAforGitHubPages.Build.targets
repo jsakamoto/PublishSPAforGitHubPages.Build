@@ -6,13 +6,13 @@
     <GHPagesEnable>$(GHPages)</GHPagesEnable>
     <GHPagesEnable Condition=" '$(GHPagesEnable)' == '' ">false</GHPagesEnable>
     <!--
-      In .NET 6 SDK that wasm-tools workload is installed, "dotnet publish" causes calling "Publish" target twice.
-      - https://github.com/dotnet/runtime/blob/v6.0.0-rc.2.21480.5/src/mono/wasm/build/README.md
-      - https://github.com/dotnet/runtime/issues/60412
+    In .NET 6 SDK that wasm-tools workload is installed, "dotnet publish" causes calling "Publish" target twice.
+    - https://github.com/dotnet/runtime/blob/v6.0.0-rc.2.21480.5/src/mono/wasm/build/README.md
+    - https://github.com/dotnet/runtime/issues/60412
     
-      To determine whether it is during the final "Publish" or not, it has to reference "WasmBuildingForNestedPublish" property is true or not.
-      - https://github.com/dotnet/runtime/blob/v6.0.0-rc.2.21480.5/src/mono/wasm/build/WasmApp.targets#L109
-      -->
+    To determine whether it is during the final "Publish" or not, it has to reference "WasmBuildingForNestedPublish" property is true or not.
+    - https://github.com/dotnet/runtime/blob/v6.0.0-rc.2.21480.5/src/mono/wasm/build/WasmApp.targets#L109
+    -->
     <GHPagesEnable Condition=" '$(WasmBuildingForNestedPublish)' == 'true' ">false</GHPagesEnable>
   </PropertyGroup>
 
@@ -50,10 +50,10 @@
 
   <Target Name="PublishSPAforGHPages" AfterTargets="Publish" DependsOnTargets="BlazorWasmBrotliLoader_Inject" Condition=" '$(GHPagesEnable)' == 'true' ">
 
-    <!-- Generate ".nojekyll" file -->
+  <!-- Generate ".nojekyll" file -->
     <WriteLinesToFile File="$(GHPagesRoot).nojekyll" Overwrite="false" />
 
-    <!-- Generate ".gitattributes" file -->
+  <!-- Generate ".gitattributes" file -->
     <WriteLinesToFile File="$(GHPagesRoot).gitattributes" Lines="* -text" Overwrite="false" />
 
     <!-- Copy index.html to 404.html -->
