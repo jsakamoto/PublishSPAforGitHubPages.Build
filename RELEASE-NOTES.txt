@@ -1,3 +1,6 @@
+v.3.0.1
+- Update the version of the Brotli loader to the latest, v.1.0.1.
+
 v.3.0.0
 - BREAKING CHANGE: Split the loading Brotli precompressed files feature into a separate package `BlazorWasmBrotliLoader.Build`.
 
